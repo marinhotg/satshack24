@@ -8,73 +8,57 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
   name          String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  // relationships
-  uploadedBills Bill[]    @relation("UploadedBills")
-  reservedBills Bill[]    @relation("ReservedBills")
-  ratings       Rating[]  @relation("UserRatings")
-  
-  // user statistics
-  totalUploaded Int       @default(0)
-  totalPaid     Int       @default(0)
-  averageRating Float     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  totalUploaded Int      @default(0)
+  totalPaid     Int      @default(0)
+  averageRating Float    @default(0)
+  reservedBills Bill[]   @relation("ReservedBills")
+  uploadedBills Bill[]   @relation("UploadedBills")
+  ratings       Rating[] @relation("UserRatings")
 }
 
 model Bill {
-  id            String    @id @default(cuid())
+  id            Int       @id @default(autoincrement())
   amount        Float
   dueDate       DateTime
-  paymentType   String    // "PIX" or "BOLETO"
-  paymentCode   String
-  status        String    // "PENDING", "RESERVED", "PAID", "EXPIRED", "CANCELLED"
+  paymentType   String
+  paymentCode   String?
+  status        String
   bonusRate     Float
-  
-  // reference to the bill file
-  fileKey       String?   // key/id of the file in storage
-  fileName      String?   // original file name
-  fileType      String?   // file type (e.g., "application/pdf")
-  
-  // relationships with User
+  currency      String
+  fileKey       String?
+  fileName      String?
+  fileType      String?
   uploadedBy    Int
-  uploader      User      @relation("UploadedBills", fields: [uploadedBy], references: [id])
   reservedBy    Int?
-  reserver      User?     @relation("ReservedBills", fields: [reservedBy], references: [id])
-  
-  // control fields
   reservedUntil DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   paidAt        DateTime?
-  
-  // payment fields
-  invoiceId     String?   // ID of the Lightning invoice
-  paymentHash   String?   // hash of the Lightning payment
-  
-  // relationships
+  invoiceId     String?
+  paymentHash   String?
+  reserver      User?     @relation("ReservedBills", fields: [reservedBy], references: [id])
+  uploader      User      @relation("UploadedBills", fields: [uploadedBy], references: [id])
   rating        Rating?
-  
+
   @@index([status])
   @@index([uploadedBy])
   @@index([reservedBy])
 }
 
 model Rating {
-  id          Int      @id @default(autoincrement())
-  rating      Int      // 1-5 stars
-  comment     String?
-  
-  // relationships
-  billId      String   @unique
-  bill        Bill     @relation(fields: [billId], references: [id])
-  raterId     Int
-  rater       User     @relation("UserRatings", fields: [raterId], references: [id])
-  
-  createdAt   DateTime @default(now())
-  
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  billId    Int      @unique
+  raterId   Int
+  createdAt DateTime @default(now())
+  rater     User     @relation("UserRatings", fields: [raterId], references: [id])
+  bill      Bill     @relation(fields: [billId], references: [id])
+
   @@index([raterId])
 }
