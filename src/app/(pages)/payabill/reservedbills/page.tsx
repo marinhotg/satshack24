@@ -44,14 +44,14 @@ const ReservedBills = () => {
       case 'paid':
         return 'bg-green-300';
       case 'ready for withdraw':
-        return 'bg-green-500'; // Verde para "Ready for Withdraw"
+        return 'bg-green-500'; 
       case 'pending':
       case 'reserved':
         return 'bg-red-300';
       case 'wait payment':
-        return 'bg-yellow-300'; // Amarelo para "Wait Payment"
+        return 'bg-yellow-300'; 
       default:
-        return 'bg-gray-300'; // Cor padrão para status desconhecido
+        return 'bg-gray-300'; 
     }
   };
 
