@@ -1,5 +1,5 @@
-import prisma from "@/lib/db"
-import { Prisma } from "@prisma/client"
+import prisma from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 interface CreateBillInput {
   amount: number;
@@ -28,8 +28,8 @@ class BillService {
       currency: billInput.currency,
       status: "PENDING",
       uploader: {
-        connect: { id: billInput.uploadedBy }
-      }
+        connect: { id: billInput.uploadedBy },
+      },
     };
 
     if (billInput.paymentCode) data.paymentCode = billInput.paymentCode;
@@ -38,7 +38,7 @@ class BillService {
     if (billInput.fileType) data.fileType = billInput.fileType;
     if (billInput.reservedBy) {
       data.reserver = {
-        connect: { id: billInput.reservedBy }
+        connect: { id: billInput.reservedBy },
       };
     }
     if (billInput.reservedUntil) data.reservedUntil = billInput.reservedUntil;
@@ -50,7 +50,7 @@ class BillService {
       include: {
         uploader: true,
         reserver: true,
-      }
+      },
     });
   }
 
@@ -68,7 +68,7 @@ class BillService {
   async updateBillStatus(id: number, status: string) {
     return prisma.bill.update({
       where: { id },
-      data: { 
+      data: {
         status,
         updatedAt: new Date(),
       },
@@ -81,10 +81,28 @@ class BillService {
       data: {
         status: "RESERVED",
         reserver: {
-          connect: { id: userId }
+          connect: { id: userId },
         },
         reservedUntil: reservationTime,
         updatedAt: new Date(),
+      },
+    });
+  }
+
+  async listReservedAndPaidedBills(userId: number) {
+    return prisma.bill.findMany({
+      where: {
+        reservedBy: userId,
+        status: {
+          in: ["RESERVED", "PAID"],
+        },
+      },
+      include: {
+        uploader: true,
+        reserver: true,
+      },
+      orderBy: {
+        dueDate: "asc",
       },
     });
   }
@@ -98,7 +116,7 @@ class BillService {
         uploader: true,
       },
       orderBy: {
-        dueDate: 'asc',
+        dueDate: "asc",
       },
     });
   }
@@ -106,10 +124,7 @@ class BillService {
   async listUserBills(userId: number) {
     return prisma.bill.findMany({
       where: {
-        OR: [
-          { uploadedBy: userId },
-          { reservedBy: userId },
-        ],
+        OR: [{ uploadedBy: userId }, { reservedBy: userId }],
       },
       include: {
         uploader: true,
@@ -117,7 +132,7 @@ class BillService {
         rating: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
   }
