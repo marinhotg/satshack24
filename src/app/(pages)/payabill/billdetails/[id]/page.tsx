@@ -3,17 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-// Defina um tipo para as informações da conta
 interface BillInfo {
   id: number;
   value: number;
   address: string;
-  currency: string;  // Moeda
-  dueDate: string;    // Data de vencimento
-  bonusRate: number;  // Taxa de bônus
+  currency: string; 
+  dueDate: string; 
+  bonusRate: number;  
 }
 
-// Defina os dados das contas localmente
 const bills: BillInfo[] = [
     { id: 1, value: 1.23, currency: 'BRL', dueDate: '01/01/1111', bonusRate: 5, address: '0x123...' },
     { id: 2, value: 4.56, currency: 'USD', dueDate: '02/02/2222', bonusRate: 10, address: '0x456...' },
