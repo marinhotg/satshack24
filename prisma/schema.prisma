@@ -8,73 +8,74 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  name          String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // relationships
-  uploadedBills Bill[]    @relation("UploadedBills")
-  reservedBills Bill[]    @relation("ReservedBills")
-  ratings       Rating[]  @relation("UserRatings")
-  
+  uploadedBills Bill[]   @relation("UploadedBills")
+  reservedBills Bill[]   @relation("ReservedBills")
+  ratings       Rating[] @relation("UserRatings")
+
   // user statistics
-  totalUploaded Int       @default(0)
-  totalPaid     Int       @default(0)
-  averageRating Float     @default(0)
+  totalUploaded Int   @default(0)
+  totalPaid     Int   @default(0)
+  averageRating Float @default(0)
 }
 
 model Bill {
-  id            String    @id @default(cuid())
-  amount        Float
-  dueDate       DateTime
-  paymentType   String    // "PIX" or "BOLETO"
-  paymentCode   String
-  status        String    // "PENDING", "RESERVED", "PAID", "EXPIRED", "CANCELLED"
-  bonusRate     Float
-  
+  id          Int      @id @default(autoincrement())
+  amount      Float
+  dueDate     DateTime
+  paymentType String // "PIX" or "BOLETO"
+  paymentCode String? // payment reference code
+  status      String // "PENDING", "RESERVED", "PAID", "EXPIRED", "CANCELLED"
+  bonusRate   Float
+  currency    String
+
   // reference to the bill file
-  fileKey       String?   // key/id of the file in storage
-  fileName      String?   // original file name
-  fileType      String?   // file type (e.g., "application/pdf")
-  
+  fileKey  String? // key/id of the file in storage
+  fileName String? // original file name
+  fileType String? // file type (e.g., "application/pdf")
+
   // relationships with User
-  uploadedBy    Int
-  uploader      User      @relation("UploadedBills", fields: [uploadedBy], references: [id])
-  reservedBy    Int?
-  reserver      User?     @relation("ReservedBills", fields: [reservedBy], references: [id])
-  
+  uploadedBy Int
+  uploader   User  @relation("UploadedBills", fields: [uploadedBy], references: [id])
+  reservedBy Int?
+  reserver   User? @relation("ReservedBills", fields: [reservedBy], references: [id])
+
   // control fields
   reservedUntil DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   paidAt        DateTime?
-  
+
   // payment fields
-  invoiceId     String?   // ID of the Lightning invoice
-  paymentHash   String?   // hash of the Lightning payment
-  
+  invoiceId   String? // ID of the Lightning invoice
+  paymentHash String? // hash of the Lightning payment
+
   // relationships
-  rating        Rating?
-  
+  rating Rating?
+
   @@index([status])
   @@index([uploadedBy])
   @@index([reservedBy])
 }
 
 model Rating {
-  id          Int      @id @default(autoincrement())
-  rating      Int      // 1-5 stars
-  comment     String?
-  
+  id      Int     @id @default(autoincrement())
+  rating  Int // 1-5 stars
+  comment String?
+
   // relationships
-  billId      String   @unique
-  bill        Bill     @relation(fields: [billId], references: [id])
-  raterId     Int
-  rater       User     @relation("UserRatings", fields: [raterId], references: [id])
-  
-  createdAt   DateTime @default(now())
-  
+  billId  Int  @unique
+  bill    Bill @relation(fields: [billId], references: [id])
+  raterId Int
+  rater   User @relation("UserRatings", fields: [raterId], references: [id])
+
+  createdAt DateTime @default(now())
+
   @@index([raterId])
 }
