@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getCurrencyList } from '../paymybill/components/currencyList';
+import { useRouter } from 'next/navigation';
 
 interface Bill {
   id: number;
@@ -52,6 +53,7 @@ const BillCard = ({
 };
 
 const BillSelectionPage = () => {
+  const router = useRouter();
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [minValue, setMinValue] = useState('');
@@ -60,6 +62,7 @@ const BillSelectionPage = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReserving, setIsReserving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const currencyList = getCurrencyList();
@@ -83,6 +86,36 @@ const BillSelectionPage = () => {
 
     fetchBills();
   }, []);
+
+  const handleReserveBill = async (billId: number) => {
+    setIsReserving(true);
+    try {
+      const reservationTime = new Date();
+      reservationTime.setMinutes(reservationTime.getMinutes() + 30);
+
+      const response = await fetch('/api/bills/reserve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          billId,
+          reservationTime: reservationTime.toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reserve bill');
+      }
+
+      router.push(`/payabill/billdetails/${billId}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reserve bill');
+      setSelectedBill(null);
+    } finally {
+      setIsReserving(false);
+    }
+  };
 
   const applyFilter = () => {
     const min = parseFloat(minValue) || 0;
@@ -249,14 +282,28 @@ const BillSelectionPage = () => {
             <p className="text-lg text-teal-800">Due Date: {new Date(selectedBill.dueDate).toLocaleDateString()}</p>
             <p className="text-lg text-teal-800">Bonus Rate: {selectedBill.bonusRate}%</p>
             <p className="text-lg text-teal-800">Uploaded by: {selectedBill.uploader.name}</p>
-            <Link href={`/payabill/billdetails/${selectedBill.id}`}>
-              <button className="bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-4 w-full">
-                Select Bill
-              </button>
-            </Link>
+            <button
+              onClick={() => handleReserveBill(selectedBill.id)}
+              disabled={isReserving}
+              className={`bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-4 w-full ${
+                isReserving ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {isReserving ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-teal-700 border-t-transparent"></div>
+                  Reserving Bill...
+                </div>
+              ) : (
+                'Select Bill'
+              )}
+            </button>
             <button
               onClick={closeModal}
-              className="bg-red-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-red-400 mt-4 w-full"
+              disabled={isReserving}
+              className={`bg-red-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-red-400 mt-4 w-full ${
+                isReserving ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               Close
             </button>

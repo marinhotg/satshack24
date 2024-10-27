@@ -1,22 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { billService } from "@/services/bill";
 
 export async function GET() {
   try {
-    const bills = await prisma.bill.findMany({
-      where: {
-        status: "PENDING",
-      },
-      include: {
-        uploader: true,
-      },
-      orderBy: {
-        dueDate: 'asc',
-      },
-    });
-
+    const bills = await billService.listPendingBills();
     return NextResponse.json(bills);
   } catch (error) {
     console.error('Failed to fetch pending bills:', error);
