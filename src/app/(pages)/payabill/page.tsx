@@ -1,29 +1,44 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getCurrencyList } from '../paymybill/components/currencyList'; // ajuste o caminho conforme necessário
+import { getCurrencyList } from '../paymybill/components/currencyList';
+
+interface Bill {
+  id: number;
+  amount: number;
+  currency: string;
+  dueDate: string;
+  bonusRate: number;
+  address: string;
+  status: string;
+  uploader: {
+    name: string;
+  };
+}
 
 const BillCard = ({
   billNumber,
-  value,
+  amount,
   currency,
   dueDate,
   bonusRate,
   onSelect,
 }: {
   billNumber: number;
-  value: number;
+  amount: number;
   currency: string;
   dueDate: string;
   bonusRate: number;
   onSelect: () => void;
 }) => {
+  const formattedDate = new Date(dueDate).toLocaleDateString();
+  
   return (
     <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 text-center shadow-md h-64 flex flex-col justify-between w-80">
       <div>
         <h2 className="text-3xl font-bold text-teal-900">Bill {billNumber}</h2>
-        <p className="text-xl font-medium text-teal-800">Value: {value} {currency}</p>
-        <p className="text-lg text-teal-800">Due Date: {dueDate}</p>
+        <p className="text-xl font-medium text-teal-800">Value: {amount} {currency}</p>
+        <p className="text-lg text-teal-800">Due Date: {formattedDate}</p>
         <p className="text-lg text-teal-800">Bonus Rate: {bonusRate}%</p>
       </div>
       <button
@@ -37,28 +52,44 @@ const BillCard = ({
 };
 
 const BillSelectionPage = () => {
-  const [bills] = useState([
-    { id: 1, value: 1.23, currency: 'BRL', dueDate: '01/01/1111', bonusRate: 5, address: '0x123...' },
-    { id: 2, value: 4.56, currency: 'USD', dueDate: '02/02/2222', bonusRate: 10, address: '0x456...' },
-    { id: 3, value: 7.89, currency: 'EUR', dueDate: '03/03/3333', bonusRate: 7, address: '0x789...' },
-    { id: 4, value: 0.99, currency: 'BRL', dueDate: '04/04/4444', bonusRate: 3, address: 'Bc1qxy2kgdtv8vg80v0c725p5d0c0xgjuy9p9q6hp6' },
-  ]);
-
-  const [filteredBills, setFilteredBills] = useState(bills);
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [minValue, setMinValue] = useState('');
   const [maxValue, setMaxValue] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState('');
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedBill, setSelectedBill] = useState<{ id: number; value: number; currency: string; dueDate: string; bonusRate: number; address: string } | null>(null);
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const currencyList = getCurrencyList(); // Obtenha a lista de moedas
+  const currencyList = getCurrencyList();
+
+  useEffect(() => {
+    const fetchBills = async () => {
+      try {
+        const response = await fetch('/api/bills/pending');
+        if (!response.ok) {
+          throw new Error('Failed to fetch bills');
+        }
+        const data = await response.json();
+        setBills(data);
+        setFilteredBills(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load bills');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBills();
+  }, []);
 
   const applyFilter = () => {
     const min = parseFloat(minValue) || 0;
     const max = parseFloat(maxValue) || Number.MAX_VALUE;
     const filtered = bills.filter((bill) => {
       const currencyMatch = selectedCurrency ? bill.currency === selectedCurrency : true;
-      return bill.value >= min && bill.value <= max && currencyMatch;
+      return bill.amount >= min && bill.amount <= max && currencyMatch;
     });
     setFilteredBills(filtered);
     setShowFilter(false);
@@ -72,13 +103,49 @@ const BillSelectionPage = () => {
     setShowFilter(false);
   };
 
-  const handleSelectBill = (bill: { id: number; value: number; currency: string; dueDate: string; bonusRate: number; address: string }) => {
+  const handleSelectBill = (bill: Bill) => {
     setSelectedBill(bill);
   };
 
   const closeModal = () => {
-    setSelectedBill(null); 
+    setSelectedBill(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full bg-teal-500 flex flex-col items-center justify-center">
+        <div className="bg-yellow-200 rounded-lg border-2 border-black p-8 shadow-lg">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-teal-700 border-t-transparent"></div>
+            <h2 className="text-2xl font-mono font-bold text-teal-900">Loading bills...</h2>
+            <p className="text-teal-800">Please wait while we fetch your bills</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen w-full bg-teal-500 flex flex-col items-center justify-center">
+        <div className="bg-yellow-200 rounded-lg border-2 border-black p-8 shadow-lg max-w-md">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-3xl">❌</span>
+            </div>
+            <h2 className="text-2xl font-mono font-bold text-teal-900">Error Loading Bills</h2>
+            <p className="text-teal-800 text-center">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-[#ADD8E6] hover:bg-[#87CEEB] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black mt-4"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-teal-500">
@@ -128,7 +195,7 @@ const BillSelectionPage = () => {
                 <option value="">All</option>
                 {currencyList.map(currency => (
                   <option key={currency.code} value={currency.code}>
-                    {currency.code} 
+                    {currency.code}
                   </option>
                 ))}
               </select>
@@ -163,7 +230,7 @@ const BillSelectionPage = () => {
             <BillCard
               key={bill.id}
               billNumber={bill.id}
-              value={bill.value}
+              amount={bill.amount}
               currency={bill.currency}
               dueDate={bill.dueDate}
               bonusRate={bill.bonusRate}
@@ -178,9 +245,10 @@ const BillSelectionPage = () => {
           <div className="bg-yellow-200 border border-black p-6 rounded-lg shadow-lg w-96">
             <h2 className="text-2xl font-bold text-teal-900 mb-4">Bill Details</h2>
             <p className="text-lg text-teal-800">Bill ID: {selectedBill.id}</p>
-            <p className="text-lg text-teal-800">Value: {selectedBill.value} {selectedBill.currency}</p>
-            <p className="text-lg text-teal-800">Due Date: {selectedBill.dueDate}</p>
+            <p className="text-lg text-teal-800">Value: {selectedBill.amount} {selectedBill.currency}</p>
+            <p className="text-lg text-teal-800">Due Date: {new Date(selectedBill.dueDate).toLocaleDateString()}</p>
             <p className="text-lg text-teal-800">Bonus Rate: {selectedBill.bonusRate}%</p>
+            <p className="text-lg text-teal-800">Uploaded by: {selectedBill.uploader.name}</p>
             <Link href={`/payabill/billdetails/${selectedBill.id}`}>
               <button className="bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-4 w-full">
                 Select Bill

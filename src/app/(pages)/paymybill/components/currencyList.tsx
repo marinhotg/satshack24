@@ -4,7 +4,6 @@ export const getCurrencyList = (): Array<{ code: string; name: string }> => {
       { code: 'EUR', name: 'Euro' },
       { code: 'BRL', name: 'Brazilian Real' },
       { code: 'CNY', name: 'Chinese Yuan' },
-      { code: 'Other', name: '' },
     ];
   };
   

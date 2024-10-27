@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { getCurrencyList } from '@/app/(pages)/paymybill/components/currencyList';
+import { getCurrencyList } from '@/src/app/(pages)/paymybill/components/currencyList';
 
 interface BillControlProps {
   params: Promise<{ id: string }>;
