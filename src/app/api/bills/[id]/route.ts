@@ -1,12 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { billService } from "@/services/bill";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const bill = await billService.getBill(Number(params.id));
+    const id = request.nextUrl.pathname.split('/').pop();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Bill ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const bill = await billService.getBill(Number(id));
     
     if (!bill) {
       return NextResponse.json(
