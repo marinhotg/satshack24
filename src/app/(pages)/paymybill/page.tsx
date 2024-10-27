@@ -29,7 +29,8 @@ export default function PayBillPage() {
         setSelectedCurrency(currencyOptions[0].code);
       }
     } catch (e) {
-      setError("Something went wrong: ", e);
+      console.error("Something went wrong:", e);
+      setError("Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
