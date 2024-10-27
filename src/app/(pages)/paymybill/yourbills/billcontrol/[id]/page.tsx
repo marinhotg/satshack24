@@ -1,32 +1,39 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { getCurrencyList } from '@/src/app/(pages)/paymybill/components/currencyList';
+import Link from 'next/link';
 
 interface BillControlProps {
   params: Promise<{ id: string }>;
 }
 
 interface Bill {
-  bonusRate: number;
-  value: number;
+  id: number;
+  amount: number;
   currency: string;
   dueDate: string;
+  bonusRate: number;
+  status: string;
+  uploader: {
+    name: string;
+  };
+  reserver?: {
+    name: string;
+  };
+  reservedUntil?: string;
 }
-
-const mockBillData: { [key: string]: Bill } = {
-  '1': { bonusRate: 5, value: 1.23, currency: 'BRL', dueDate: '01/01/1111' },
-  '2': { bonusRate: 10, value: 4.56, currency: 'USD', dueDate: '02/02/2222' },
-  '3': { bonusRate: 7, value: 7.89, currency: 'EUR', dueDate: '03/03/3333' },
-  '4': { bonusRate: 3, value: 0.99, currency: 'BRL', dueDate: '04/04/4444' },
-};
 
 const BillControl: React.FC<BillControlProps> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
-  const [billData, setBillData] = useState<Bill | null>(null);
+  const [bill, setBill] = useState<Bill | null>(null);
+  const [amount, setAmount] = useState<number>(0);
   const [currency, setCurrency] = useState<string>('BRL');
-  const [value, setValue] = useState<number>(0);
   const [dueDate, setDueDate] = useState<string>('');
   const [bonusRate, setBonusRate] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
 
   const currencyList = getCurrencyList();
 
@@ -37,39 +44,131 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
   }, [params]);
 
   useEffect(() => {
-    if (id) {
-      const bill = mockBillData[id];
-      if (bill) {
-        setBillData(bill);
-        setCurrency(bill.currency);
-        setValue(bill.value);
-        setDueDate(bill.dueDate);
-        setBonusRate(bill.bonusRate);
-      } else {
-        console.error("Bill not found");
+    const fetchBillDetails = async () => {
+      if (!id) return;
+
+      try {
+        const response = await fetch(`/api/bills/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch bill details');
+        }
+        const data = await response.json();
+        setBill(data);
+        setAmount(data.amount);
+        setCurrency(data.currency);
+        setDueDate(new Date(data.dueDate).toISOString().split('T')[0]);
+        setBonusRate(data.bonusRate);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load bill details');
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    fetchBillDetails();
   }, [id]);
 
-  const handlePayment = () => {
-    alert(`Payment of ${value} ${currency} has been made!`);
+  const handlePayment = async () => {
+    if (!id) return;
+    setIsPaying(true);
+    try {
+      const response = await fetch(`/api/bills/${id}/pay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoiceId: 'dummy-invoice', // Para o MVP
+          paymentHash: 'dummy-hash', // Para o MVP
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process payment');
+      }
+
+      alert('Payment processed successfully!');
+      window.location.href = '/yourbills'; // Redireciona após o pagamento
+    } catch (err) {
+      console.error('Failed to process payment:', err);
+      alert('Failed to process payment. Please try again.');
+    } finally {
+      setIsPaying(false);
+    }
   };
 
-  const handleSaveChanges = () => {
-    alert("Changes saved successfully!");
+  const handleSaveChanges = async () => {
+    if (!id) return;
+    setIsSaving(true);
+    try {
+      // Por enquanto, apenas atualizamos o status para o MVP
+      const response = await fetch(`/api/bills/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'PENDING', // Para o MVP, sempre volta para PENDING
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save changes');
+      }
+
+      alert('Changes saved successfully!');
+    } catch (err) {
+      console.error('Failed to save changes:', err);
+      alert('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleAccessReceipt = () => {
-    alert("Receipt accessed!");
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full bg-teal-500 flex flex-col items-center justify-center">
+        <div className="bg-[#FFFAA0] rounded-lg border-2 border-black p-8 shadow-lg">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-teal-700 border-t-transparent"></div>
+            <h2 className="text-2xl font-mono font-bold text-teal-900">Loading bill details...</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  if (!billData) return <div>Loading...</div>;
+  if (error || !bill) {
+    return (
+      <div className="min-h-screen w-full bg-teal-500 flex flex-col items-center justify-center">
+        <div className="bg-[#FFFAA0] rounded-lg border-2 border-black p-8 shadow-lg">
+          <h2 className="text-2xl font-mono font-bold text-teal-900">
+            {error || 'Bill not found'}
+          </h2>
+          <Link href="/yourbills">
+            <button className="mt-4 bg-[#FADA5E] hover:bg-[#fa8c5e] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Back to Your Bills
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center h-screen w-screen bg-teal-500 pt-16">
+    <div className="flex flex-col items-center min-h-screen w-screen bg-teal-500 pt-16">
       <h1 className="text-4xl font-serif font-bold text-white my-8">Bill Control - Bill ID: {id}</h1>
 
       <div className="bg-[#FFFAA0] w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black">
+        <div className="mb-4">
+          <p className="text-lg font-bold text-gray-700">Status: {bill.status}</p>
+          {bill.reservedUntil && (
+            <p className="text-sm text-gray-600">
+              Reserved until: {new Date(bill.reservedUntil).toLocaleString()}
+            </p>
+          )}
+        </div>
+
         <div className="mb-3">
           <label className="block font-bold mb-1">Bonus Rate:</label>
           <input
@@ -84,8 +183,8 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
           <label className="block font-bold mb-1">Value:</label>
           <input
             type="number"
-            value={value}
-            onChange={(e) => setValue(Number(e.target.value))}
+            value={amount}
+            onChange={(e) => setAmount(Number(e.target.value))}
             className="border border-gray-300 p-1 rounded w-full"
           />
         </div>
@@ -115,30 +214,31 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
           />
         </div>
 
-        <div className="flex flex-row items-center justify-between mt-3 space-x-2">
-          <button
-            onClick={handleAccessReceipt}
-            className="bg-gray-500 text-white font-semibold py-2 px-4 w-full rounded-lg hover:bg-gray-600 text-sm"
-          >
-            Access Receipt
-          </button>
-
+        <div className="flex flex-col space-y-3 mt-4">
           <button
             onClick={handlePayment}
-            className="bg-blue-500 text-white font-semibold py-2 px-4 w-full rounded-lg hover:bg-blue-600 text-sm"
+            disabled={isPaying || bill.status === 'PAID'}
+            className={`bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            Make Payment
+            {isPaying ? 'Processing...' : 'Make Payment'}
           </button>
-        </div>
 
-        <div className="flex flex-col items-center mt-3">
           <button
             onClick={handleSaveChanges}
-            className="bg-green-500 text-white font-semibold py-2 px-4 w-full rounded-lg hover:bg-green-600 text-sm"
+            disabled={isSaving}
+            className={`bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            Save Changes
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
+      </div>
+
+      <div className="fixed bottom-4 left-4">
+        <Link href="/paymybill/yourbills">
+          <button className="bg-[#FFFAA0] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+            Go Back
+          </button>
+        </Link>
       </div>
     </div>
   );
