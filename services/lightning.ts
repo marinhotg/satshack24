@@ -1,60 +1,113 @@
-import { lightsparkClient } from "@/lib/lightspark/client";
-import { CurrencyAmount } from "@lightsparkdev/lightspark-sdk";
+import {
+  AccountTokenAuthProvider,
+  LightsparkClient,
+  BitcoinNetwork
+} from "@lightsparkdev/lightspark-sdk";
 
-interface CreateInvoiceParams {
-  amountSats: number;
-  memo: string;
-  expiresIn: number;
-}
+class LightningService {
+  private client: LightsparkClient;
+  private nodeId: string;
+  private nodePassword: string;
 
-export class LightningService {
-  async createPaymentInvoice({ amountSats, memo, expiresIn }: CreateInvoiceParams) {
+  constructor() {
+    const requireEnv = (name: string): string => {
+      const value = process.env[name];
+      if (value === undefined) {
+        throw new Error(`Environment variable ${name} is not set.`);
+      }
+      return value;
+    };
+
+    const tokenId = requireEnv("LIGHTSPARK_API_TOKEN_CLIENT_ID");
+    const tokenSecret = requireEnv("LIGHTSPARK_API_TOKEN_CLIENT_SECRET");
+    this.nodeId = requireEnv("LIGHTSPARK_NODE_ID");
+    this.nodePassword = requireEnv("LIGHTSPARK_NODE_PASSWORD");
+
+    this.client = new LightsparkClient(
+      new AccountTokenAuthProvider(tokenId, tokenSecret)
+    );
+
+    this.initializeNode();
+  }
+
+  private async initializeNode(): Promise<void> {
     try {
-      const invoice = await lightsparkClient.createInvoice({
-        amountMsats: amountSats * 1000, 
-        memo,
-        expirySecs: expiresIn
+      await this.client.loadNodeSigningKey(this.nodeId, { 
+        password: this.nodePassword 
       });
-      
+    } catch (error) {
+      console.error('Failed to initialize node:', error);
+      throw new Error('Failed to initialize Lightning node');
+    }
+  }
+
+  async createInvoice(amountMsats: number, memo: string): Promise<string> {
+    try {
+      const invoice = await this.client.createInvoice(
+        this.nodeId,
+        amountMsats,
+        memo
+      );
+
+      if (!invoice) {
+        throw new Error("Unable to create the invoice.");
+      }
+
       return invoice;
     } catch (error) {
-      console.error('Error creating invoice:', error);
-      throw error;
+      console.error('Failed to create invoice:', error);
+      throw new Error('Failed to create Lightning invoice');
     }
   }
 
-  async checkPaymentStatus(invoiceId: string) {
+  async payInvoice(encodedInvoice: string, maxAmountMsats: number) {
     try {
-      const invoice = await lightsparkClient.getInvoice(invoiceId);
-      return invoice.status;
-    } catch (error) {
-      console.error('Error checking payment status:', error);
-      throw error;
-    }
-  }
+      const payment = await this.client.payInvoice(
+        this.nodeId,
+        encodedInvoice,
+        maxAmountMsats
+      );
 
-  async sendPayment(invoiceCode: string) {
-    try {
-      const payment = await lightsparkClient.payInvoice({
-        encodedInvoice: invoiceCode,
-        maximumFeesBase: CurrencyAmount.zero(),
-        timeoutSecs: 60
-      });
-      
+      if (!payment) {
+        throw new Error("Payment failed");
+      }
+
       return payment;
     } catch (error) {
-      console.error('Error sending payment:', error);
-      throw error;
+      console.error('Failed to pay invoice:', error);
+      throw new Error('Failed to complete Lightning payment');
     }
   }
 
-  async getWalletBalance() {
+  async getTransactions() {
     try {
-      const wallet = await lightsparkClient.getCurrentWallet();
-      return wallet.balances?.availableToSendBalance;
+      const account = await this.client.getCurrentAccount();
+      if (!account) {
+        throw new Error("Unable to fetch the account.");
+      }
+
+      const transactionsConnection = await account.getTransactions(
+        this.client,
+        100, // limit
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        BitcoinNetwork.REGTEST
+      );
+
+      return {
+        transactions: transactionsConnection.entities,
+        count: transactionsConnection.count
+      };
     } catch (error) {
-      console.error('Error getting wallet balance:', error);
-      throw error;
+      console.error('Failed to get transactions:', error);
+      throw new Error('Failed to fetch transactions');
     }
   }
 }
+
+// Create singleton instance
+const lightningService = new LightningService();
+
+export default lightningService;

@@ -1,6 +1,12 @@
-import { LightsparkClient } from "@lightsparkdev/lightspark-sdk";
+import { LightsparkClient, AccountTokenAuthProvider } from "@lightsparkdev/lightspark-sdk";
 
-export const lightsparkClient = new LightsparkClient({
-  apiTokenClientId: process.env.LIGHTSPARK_API_TOKEN_CLIENT_ID!,
-  apiTokenClientSecret: process.env.LIGHTSPARK_API_TOKEN_CLIENT_SECRET!,
-});
+if (!process.env.LIGHTSPARK_API_TOKEN_CLIENT_ID || !process.env.LIGHTSPARK_API_TOKEN_CLIENT_SECRET) {
+  throw new Error('Missing Lightspark credentials in environment variables');
+}
+
+export const lightsparkClient = new LightsparkClient(
+  new AccountTokenAuthProvider(
+    process.env.LIGHTSPARK_API_TOKEN_CLIENT_ID,
+    process.env.LIGHTSPARK_API_TOKEN_CLIENT_SECRET
+  )
+);
