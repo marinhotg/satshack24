@@ -1,24 +1,34 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { getCurrencyList } from '@/app/(pages)/paymybill/components/currencyList';
 
 interface BillControlProps {
   params: Promise<{ id: string }>;
 }
 
+interface Bill {
+  bonusRate: number;
+  value: number;
+  currency: string;
+  dueDate: string;
+}
+
+const mockBillData: { [key: string]: Bill } = {
+  '1': { bonusRate: 5, value: 1.23, currency: 'BRL', dueDate: '01/01/1111' },
+  '2': { bonusRate: 10, value: 4.56, currency: 'USD', dueDate: '02/02/2222' },
+  '3': { bonusRate: 7, value: 7.89, currency: 'EUR', dueDate: '03/03/3333' },
+  '4': { bonusRate: 3, value: 0.99, currency: 'BRL', dueDate: '04/04/4444' },
+};
+
 const BillControl: React.FC<BillControlProps> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
-  const [billData, setBillData] = useState<any>(null);
+  const [billData, setBillData] = useState<Bill | null>(null);
   const [currency, setCurrency] = useState<string>('BRL');
   const [value, setValue] = useState<number>(0);
   const [dueDate, setDueDate] = useState<string>('');
   const [bonusRate, setBonusRate] = useState<number>(0);
 
-  const mockBillData: { [key: string]: { bonusRate: number; value: number; currency: string; dueDate: string } } = {
-    '1': { bonusRate: 5, value: 1.23, currency: 'BRL', dueDate: '01/01/1111' },
-    '2': { bonusRate: 10, value: 4.56, currency: 'USD', dueDate: '02/02/2222' },
-    '3': { bonusRate: 7, value: 7.89, currency: 'EUR', dueDate: '03/03/3333' },
-    '4': { bonusRate: 3, value: 0.99, currency: 'BRL', dueDate: '04/04/4444' },
-  };
+  const currencyList = getCurrencyList();
 
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -87,9 +97,11 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
             onChange={(e) => setCurrency(e.target.value)}
             className="border border-gray-300 p-1 rounded w-full"
           >
-            <option value="BRL">BRL</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
+            {currencyList.map(({ code, name }) => (
+              <option key={code} value={code}>
+                {name || code}
+              </option>
+            ))}
           </select>
         </div>
 
