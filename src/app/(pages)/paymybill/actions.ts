@@ -6,7 +6,6 @@ export async function createBill(formData: FormData) {
   try {
     const amount = parseFloat(formData.get("amount") as string);
     const dueDate = new Date(formData.get("dueDate") as string);
-    const paymentType = formData.get("paymentType") as string;
     const currency = formData.get("currency") as string;
     const bonusRate = parseFloat(formData.get("bonusRate") as string || "0");
     
@@ -18,26 +17,27 @@ export async function createBill(formData: FormData) {
       return { error: "Invalid bonus rate" };
     }
 
+    const user = await prisma.user.upsert({
+      where: {
+        email: "test@example.com"
+      },
+      create: {
+        email: "test@example.com",
+        name: "Test User",
+        senha: "test123",
+        nodeId: "test-123",
+      },
+      update: {}
+    });
+
     const bill = await prisma.bill.create({
       data: {
         amount,
         dueDate,
-        paymentType,
         currency,
         bonusRate,
         status: "PENDING",
-        // fixed user for MVP
-        uploader: {
-          connectOrCreate: {
-            where: {
-              email: "test@example.com"
-            },
-            create: {
-              email: "test@example.com",
-              name: "Test User"
-            }
-          }
-        }
+        uploadedBy: user.id,  
       },
       include: {
         uploader: true

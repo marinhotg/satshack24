@@ -120,21 +120,6 @@ export default function PayBillPage() {
 
           <div>
             <label className="block mb-2 text-gray-700 font-mono font-bold">
-              Payment Type
-            </label>
-            <select
-              name="paymentType"
-              required
-              className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
-            >
-              <option value="BANK_TRANSFER">Bank Transfer</option>
-              <option value="CRYPTO">Cryptocurrency</option>
-              <option value="CARD">Credit/Debit Card</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-2 text-gray-700 font-mono font-bold">
               Currency
             </label>
             <select
