@@ -42,19 +42,18 @@ const ReservedBills = () => {
     };
 
     fetchReservedBills();
-  });
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "paid":
-        return "bg-green-300";
-      case "ready for withdraw":
-        return "bg-green-500";
-      case "pending":
       case "reserved":
         return "bg-red-300";
-      case "Paid":
+      case "processing":
         return "bg-yellow-300";
+      case "approved":
+        return "bg-blue-300";
+      case "completed":
+        return "bg-green-500";
       default:
         return "bg-gray-300";
     }
@@ -126,8 +125,9 @@ const ReservedBills = () => {
         >
           <option value="All">All</option>
           <option value="RESERVED">Reserved</option>
-          <option value="Ready for Withdraw">Ready for Withdraw</option>
-          <option value="Paid">Wait Payment</option>
+          <option value="PROCESSING">Processing - Wait for approving</option>
+          <option value="APPROVED">Approved - Wait for payment </option>
+          <option value="COMPLETED">Make the rating</option>
         </select>
       </div>
 
@@ -173,20 +173,29 @@ const ReservedBills = () => {
                     </button>
                   </Link>
                 )}
-                {bill.status === "Ready for Withdraw" && (
-                  <Link href={`reservedbills/billwithdraw/${bill.id}`}>
-                    <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
-                      Withdraw
-                    </button>
-                  </Link>
-                )}
-                {bill.status === "Paid" && (
+                {bill.status === "PROCESSING" && (
                   <button
-                    className="bg-gray-500 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
                     disabled
                   >
-                    Wait for the refound
+                    Wait for approving
                   </button>
+                )}
+                {bill.status === "APPROVED" && (
+                  <button
+                    className="bg-blue-400 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+                    disabled>
+                    Wait for payment
+                  </button>
+
+
+                )}
+                {bill.status === "COMPLETED" && (
+                  <Link href={`reservedbills/billrate/${bill.id}`}>
+                    <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+                      Rate the process
+                    </button>
+                  </Link>
                 )}
               </div>
             </div>

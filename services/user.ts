@@ -1,79 +1,174 @@
-import { PrismaClient } from "@prisma/client";
-import { User } from "../types/bill";
+import { PrismaClient, User as PrismaUser, Bill, Rating } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Types
+type CreateUserInput = {
+  email: string;
+  senha: string;
+  name: string;
+  nodeId: string;
+};
+
+type UpdateUserOptions = {
+  email?: string;
+  senha?: string;
+  name?: string;
+  nodeId?: string;
+  averageRating?: number;
+  totalPaid?: number;
+};
+
 export class UserService {
-  // Função para criar um novo usuário
-  async createUser(
-    userData: Omit<
-      User,
-      | "id"
-      | "createdAt"
-      | "updatedAt"
-      | "totalUploaded"
-      | "totalPaid"
-      | "averageRating"
-    >
-  ) {
+  // Criar novo usuário
+  async createUser(userData: CreateUserInput): Promise<PrismaUser> {
     return prisma.user.create({
       data: {
         ...userData,
-        totalUploaded: 0,
         totalPaid: 0,
         averageRating: 0,
       },
     });
   }
 
-  // Função para atualizar os dados de um usuário existente
+  // Buscar usuário por ID
+  async getUserById(userId: number): Promise<PrismaUser | null> {
+    return prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        reservedBills: true,
+        uploadedBills: true,
+        ratings: true,
+      },
+    });
+  }
+
+  // Buscar usuário por email
+  async getUserByEmail(email: string): Promise<PrismaUser | null> {
+    return prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  // Atualizar usuário
   async updateUser(
     userId: number,
-    updateOptions: {
-      rating?: number;
-      totalPaid?: number;
-      totalUploaded?: number;
-    }
-  ) {
-    const updateData: Partial<User> = {};
+    updateData: UpdateUserOptions
+  ): Promise<PrismaUser> {
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
 
-    // Condicional para cada campo que pode ser atualizado
-    if (updateOptions.rating !== undefined) {
-      updateData.averageRating = updateOptions.rating;
-    }
-    if (updateOptions.totalPaid !== undefined) {
-      updateData.totalPaid = updateOptions.totalPaid;
-    }
-    if (updateOptions.totalUploaded !== undefined) {
-      updateData.totalUploaded = updateOptions.totalUploaded;
+    if (!existingUser) {
+      throw new Error("Usuário não encontrado");
     }
 
-    // Verifica se há campos para atualizar
-    if (Object.keys(updateData).length === 0) {
-      throw new Error("Nenhum campo para atualizar foi fornecido.");
-    }
-
-    // Realiza a atualização com os dados coletados
     return prisma.user.update({
       where: { id: userId },
       data: updateData,
     });
   }
 
-  async getBillsReservedByUser(userId: number) {
-    return prisma.bill.findMany({
+  // Atualizar média de avaliação do usuário
+  async updateUserRating(userId: number): Promise<PrismaUser> {
+    const ratings = await prisma.rating.findMany({
       where: {
-        reservedBy: userId,
-        status: "PAID",
+        bill: {
+          uploadedBy: userId,
+        },
+      },
+      select: {
+        rating: true,
+      },
+    });
+
+    const averageRating =
+      ratings.length > 0
+        ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
+        : 0;
+
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        averageRating,
       },
     });
   }
 
-  async getBillsUploadedByUser(userId: number) {
+  // Atualizar total pago pelo usuário
+  async updateUserTotalPaid(userId: number): Promise<PrismaUser> {
+    const reservedBills = await prisma.bill.findMany({
+      where: {
+        reservedBy: userId,
+        status: "PAID",
+      },
+      select: {
+        amount: true,
+      },
+    });
+
+    const totalPaid = reservedBills.reduce(
+      (acc, curr) => acc + Math.round(curr.amount),
+      0
+    );
+
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        totalPaid,
+      },
+    });
+  }
+
+  // Buscar contas reservadas pelo usuário
+  async getBillsReservedByUser(
+    userId: number,
+    status?: string
+  ): Promise<Bill[]> {
+    return prisma.bill.findMany({
+      where: {
+        reservedBy: userId,
+        ...(status && { status }),
+      },
+      include: {
+        rating: true,
+      },
+    });
+  }
+
+  // Buscar contas enviadas pelo usuário
+  async getBillsUploadedByUser(
+    userId: number,
+    status?: string
+  ): Promise<Bill[]> {
     return prisma.bill.findMany({
       where: {
         uploadedBy: userId,
+        ...(status && { status }),
       },
+      include: {
+        rating: true,
+        reserver: true,
+      },
+    });
+  }
+
+  // Buscar avaliações feitas pelo usuário
+  async getUserRatings(userId: number): Promise<Rating[]> {
+    return prisma.rating.findMany({
+      where: {
+        raterId: userId,
+      },
+      include: {
+        bill: true,
+      },
+    });
+  }
+
+  // Deletar usuário
+  async deleteUser(userId: number): Promise<PrismaUser> {
+    return prisma.user.delete({
+      where: { id: userId },
     });
   }
 }
