@@ -8,7 +8,9 @@ export async function createBill(formData: FormData) {
     const dueDate = new Date(formData.get("dueDate") as string);
     const currency = formData.get("currency") as string;
     const bonusRate = parseFloat(formData.get("bonusRate") as string || "0");
-    
+    const fileUrl = formData.get("fileUrl") as string;
+    const uploadedById = formData.get("userId");
+
     if (isNaN(amount) || amount <= 0) {
       return { error: "Invalid amount" };
     }
@@ -17,18 +19,13 @@ export async function createBill(formData: FormData) {
       return { error: "Invalid bonus rate" };
     }
 
-    const user = await prisma.user.upsert({
-      where: {
-        email: "test@example.com"
-      },
-      create: {
-        email: "test@example.com",
-        name: "Test User",
-        senha: "test123",
-        nodeId: "test-123",
-      },
-      update: {}
-    });
+    if (!uploadedById) {
+      return { error: "User ID is required" };
+    }
+
+    if (!fileUrl) {
+      return { error: "Bill file URL is required" };
+    }
 
     const bill = await prisma.bill.create({
       data: {
@@ -37,7 +34,10 @@ export async function createBill(formData: FormData) {
         currency,
         bonusRate,
         status: "PENDING",
-        uploadedBy: user.id,  
+        uploadedBy: Number(uploadedById),
+        fileUrl, 
+        filePathname: fileUrl.split('/').pop() || 'bill', 
+        fileUploadedAt: new Date(), 
       },
       include: {
         uploader: true
