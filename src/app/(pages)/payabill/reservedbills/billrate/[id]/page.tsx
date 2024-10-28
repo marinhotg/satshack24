@@ -19,7 +19,7 @@ interface Bill {
   reservedUntil?: string;
 }
 
-const BillWithdrawPage = () => {
+const BillRatingPage = () => {
   const [bill, setBill] = useState<Bill | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,7 +106,7 @@ const BillWithdrawPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-teal-500">
-      <h1 className="text-4xl font-serif font-bold text-white mb-4">Bill Withdraw</h1>
+      <h1 className="text-4xl font-serif font-bold text-white mb-4">Bill Rating</h1>
       
       <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-96 flex flex-col items-center">
         <h2 className="text-2xl font-bold text-teal-900 mb-2">Bill ID: {bill.id}</h2>
@@ -123,14 +123,13 @@ const BillWithdrawPage = () => {
           <p className="text-lg text-teal-800">Rating: {rating} star{rating !== 1 ? 's' : ''}</p>
         </div>
 
-        {/* Botão de Withdraw */}
         <button className="w-full bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-6">
-          Withdraw
+          Send Review
         </button>
       </div>
 
       <div className="fixed bottom-4 left-4">
-        <Link href="/withdraw">
+        <Link href="/payabill/reservedbills">
           <button className="bg-[#FFFAA0] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
             Go Back
           </button>
@@ -140,4 +139,4 @@ const BillWithdrawPage = () => {
   );
 };
 
-export default BillWithdrawPage;
+export default BillRatingPage;

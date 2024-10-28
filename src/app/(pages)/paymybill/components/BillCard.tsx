@@ -16,23 +16,72 @@ const BillCard: React.FC<BillCardProps> = ({
   currency,
   dueDate,
 }) => {
+
   const getStatusColor = () => {
     switch (status.toLowerCase()) {
-      case 'paid':
-        return 'bg-green-300';
-      case 'ready for withdraw':
-        return 'bg-green-500';
-      case 'pending':
-      case 'reserved':
-        return 'bg-red-300';
-      case 'wait payment':
-        return 'bg-yellow-300';
+      case "completed":
+        return "bg-green-500";
+      case "pending":
+        return "bg-orange-300";
+      case "reserved":
+        return "bg-red-300";
+      case "processing":
+        return "bg-yellow-300";
+      case "approved":
+        return "bg-blue-300";
       default:
-        return 'bg-gray-300';
+        return "bg-gray-300";
     }
   };
 
   const formattedDate = new Date(dueDate).toLocaleDateString();
+
+  const renderActionButton = () => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return (
+          <Link href={`yourbills/billcontrol/${billNumber}`}>
+            <button className="bg-[#FADA5E] hover:bg-[#fa8c5e] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Change the Bill
+            </button>
+          </Link>
+        );
+      case 'reserved':
+        return (
+          <button
+            className="bg-red-300 text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+            disabled
+          >
+            Wait the Paid
+          </button>
+        );
+      case 'processing':
+        return (
+          <Link href={`yourbills/approvebill/${billNumber}`}>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Approve Receipt
+            </button>
+          </Link>
+        );
+      case 'approved':
+        return (
+          <Link href={`yourbills/refoundbill/${billNumber}`}>
+            <button className="bg-blue-400 hover:bg-blue-500 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Make the Refound
+            </button>
+          </Link>
+        );
+      case 'completed':
+        return (
+          <button className="bg-green-400 hover:bg-green-500 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed" 
+          disabled>
+            Finish
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex justify-center p-4">
@@ -52,11 +101,7 @@ const BillCard: React.FC<BillCardProps> = ({
           <span className="font-bold">Due Date:</span> {formattedDate}
         </div>
 
-        <Link href={`yourbills/billcontrol/${billNumber}`}>
-          <button className="bg-[#FADA5E] hover:bg-[#fa8c5e] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
-            Select Bill
-          </button>
-        </Link>
+        <div className="mt-4">{renderActionButton()}</div>
       </div>
     </div>
   );
