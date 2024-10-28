@@ -174,7 +174,7 @@ const ReservedBills = () => {
                   </Link>
                 )}
                 {bill.status === "Ready for Withdraw" && (
-                  <Link href={`/reservedbills/billwithdraw/${bill.id}`}>
+                  <Link href={`reservedbills/billwithdraw/${bill.id}`}>
                     <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
                       Withdraw
                     </button>
