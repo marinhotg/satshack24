@@ -13,7 +13,6 @@ export default function PayBillPage() {
   const [success, setSuccess] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(currencyOptions[0].code);
   const [billFile, setBillFile] = useState<File | null>(null);
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setIsSubmitting(true);
@@ -32,7 +31,8 @@ export default function PayBillPage() {
         handleUploadUrl: '/api/bills/upload-bill',
       });
 
-      setBlobUrl(newBlob.url);
+      // If you need the blob URL
+      // setBlobUrl(newBlob.url); 
 
       formData.append("billFile", newBlob.url);
 
@@ -46,7 +46,6 @@ export default function PayBillPage() {
         form.reset();
         setSelectedCurrency(currencyOptions[0].code);
         setBillFile(null); 
-        setBlobUrl(null); 
       }
     } catch (e) {
       console.error("Something went wrong:", e);
