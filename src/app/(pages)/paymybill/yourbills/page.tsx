@@ -92,10 +92,10 @@ const YourBills = () => {
           className="bg-white text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black"
         >
           <option value="all">All</option>
-          <option value="paid">Paid</option>
+          <option value="approved">Approved</option>
           <option value="pending">Pending</option>
           <option value="reserved">Reserved</option>
-          <option value="expired">Expired</option>
+          <option value="processing">Processing</option>
           <option value="completed">Completed</option>
         </select>
       </div>

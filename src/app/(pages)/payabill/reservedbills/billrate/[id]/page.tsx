@@ -123,9 +123,8 @@ const BillWithdrawPage = () => {
           <p className="text-lg text-teal-800">Rating: {rating} star{rating !== 1 ? 's' : ''}</p>
         </div>
 
-        {/* Botão de Withdraw */}
         <button className="w-full bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-6">
-          Withdraw
+          Send Review
         </button>
       </div>
 

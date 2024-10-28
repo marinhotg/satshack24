@@ -16,18 +16,19 @@ const BillCard: React.FC<BillCardProps> = ({
   currency,
   dueDate,
 }) => {
+
   const getStatusColor = () => {
     switch (status.toLowerCase()) {
-      case 'paid':
-        return 'bg-green-300';
-      case 'pending':
-        return 'bg-orange-300';
-      case 'reserved':
-        return 'bg-red-300';
-      case 'wait payment':
-        return 'bg-yellow-300';
+      case "completed":
+        return "bg-green-500";
+      case "reserved":
+        return "bg-red-300";
+      case "processing":
+        return "bg-yellow-300";
+      case "approved":
+        return "bg-blue-500";
       default:
-        return 'bg-gray-300';
+        return "bg-gray-300";
     }
   };
 
@@ -52,7 +53,7 @@ const BillCard: React.FC<BillCardProps> = ({
             Wait the Paid
           </button>
         );
-      case 'paid':
+      case 'processing':
         return (
           <Link href={`yourbills/refoundbill/${billNumber}`}>
             <button className="bg-green-500 hover:bg-green-600 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
@@ -60,7 +61,12 @@ const BillCard: React.FC<BillCardProps> = ({
             </button>
           </Link>
         );
-      case 'expired':
+      case 'approved':
+        return (
+          <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+            Wait for the rating
+          </button>
+        );
       case 'completed':
         return (
           <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">

@@ -98,7 +98,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
               <span className="font-bold">Bonus Rate:</span> {bill.bonusRate}%
             </p>
             <p className="mb-3">
-              <span className="font-bold">Status:</span> {bill.status === 'PAID' ? 'PAID' : 'COMPLETED'}
+              <span className="font-bold">Status:</span> {bill.status === 'PROCESSING' ? 'PROCESSING' : 'COMPLETED'}
             </p>
             <p className="mb-5">
               <span className="font-bold">Total Amount to Pay:</span> {calculatedAmount.toFixed(2)} {bill.currency}
