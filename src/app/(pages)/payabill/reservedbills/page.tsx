@@ -42,7 +42,7 @@ const ReservedBills = () => {
     };
 
     fetchReservedBills();
-  });
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
