@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { billService } from "@/services/bill";
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  try {
-    const id = request.nextUrl.pathname.split('/').pop();
+export const dynamic = 'force-dynamic';
 
+export async function GET(
+  request: NextRequest
+): Promise<NextResponse> {
+  const id = request.url.split('/').pop();
+  
+  try {
     if (!id) {
       return NextResponse.json(
         { error: 'Bill ID is required' },
