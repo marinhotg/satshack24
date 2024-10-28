@@ -125,19 +125,43 @@ class BillService {
   }
 
   async listUserBills(userId: number) {
-    return prisma.bill.findMany({
-      where: {
-        OR: [{ uploadedBy: userId }, { reservedBy: userId }],
-      },
-      include: {
-        uploader: true,
-        reserver: true,
-        rating: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    try {
+      const bills = await prisma.bill.findMany({
+        where: {
+          uploadedBy: userId, 
+        },
+        select: {
+          id: true,
+          amount: true,
+          currency: true,
+          dueDate: true,
+          status: true,
+          uploadedBy: true,
+          uploader: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      const filteredBills = bills.filter(bill => bill.uploadedBy === userId);
+      
+      if (bills.length !== filteredBills.length) {
+        console.warn('Found bills that dont belong to user:', 
+          bills.filter(bill => bill.uploadedBy !== userId));
+      }
+
+      return filteredBills;
+    } catch (error) {
+      console.error('Error in listUserBills:', error);
+      throw error;
+    }
   }
 
   async markAsPaid(id: number) {

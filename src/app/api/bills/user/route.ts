@@ -1,11 +1,22 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { billService } from "@/services/bill";
 
-const FIXED_USER_ID = 1; // fixed user
-
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const bills = await billService.listUserBills(FIXED_USER_ID);
+    const searchParams = request.nextUrl.searchParams;
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    console.log('Fetching bills for userId:', userId);
+    const bills = await billService.listUserBills(Number(userId));
+    console.log('Found bills:', bills);
+    
     return NextResponse.json(bills);
   } catch (error) {
     console.error("Failed to fetch user bills:", error);

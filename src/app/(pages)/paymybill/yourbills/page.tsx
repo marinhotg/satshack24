@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { useAuth } from "@/contexts/AuthContext";
 import BillCard from '../components/BillCard';
 import Link from 'next/link';
 
@@ -13,14 +14,21 @@ interface Bill {
 
 const YourBills = () => {
   const [bills, setBills] = useState<Bill[]>([]);
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     const fetchBills = async () => {
+      if (!user) {
+        setError("Please log in to view your bills");
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch('/api/bills/user');
+        const response = await fetch(`/api/bills/user?userId=${user.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch bills');
         }
@@ -34,7 +42,7 @@ const YourBills = () => {
     };
 
     fetchBills();
-  }, []);
+  }, [user]);
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(event.target.value);
@@ -73,6 +81,22 @@ const YourBills = () => {
             >
               Try Again
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+   if (!user) {
+    return (
+      <div className="min-h-screen w-full bg-teal-500 flex flex-col items-center justify-center">
+        <div className="bg-[#FFFAA0] rounded-lg border-2 border-black p-8 shadow-lg">
+          <div className="flex flex-col items-center gap-4">
+            <Link href="/login">
+              <button className="w-full p-4 bg-yellow-100 hover:bg-yellow-200 border-2 border-yellow-400 rounded-lg text-yellow-700 font-mono font-bold text-center cursor-pointer transition-colors">
+                Please log in to view your bills
+              </button>
+            </Link>
           </div>
         </div>
       </div>
