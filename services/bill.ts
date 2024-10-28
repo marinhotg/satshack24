@@ -1,4 +1,4 @@
-import prisma from "../lib/db"
+import prisma from "@/lib/db"
 import { Prisma } from "@prisma/client"
 
 interface CreateBillInput {
@@ -18,7 +18,7 @@ interface CreateBillInput {
   paymentHash?: string;
 }
 
-export class BillService {
+class BillService {
   async createBill(billInput: CreateBillInput) {
     const data: Prisma.BillCreateInput = {
       amount: billInput.amount,
@@ -136,5 +136,4 @@ export class BillService {
   }
 }
 
-const billService = new BillService();
-export default billService;
+export const billService = new BillService();
