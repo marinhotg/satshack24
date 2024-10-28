@@ -1,90 +1,37 @@
+// app/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Novo estado para controlar a navegação
-
-  useEffect(() => {
-    setError('');
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!email || !password) {
-      setError('Por favor, preencha todos os campos.');
-      return;
-    }
-
-    console.log('Autenticando:', { email, password });
-    
-    // Simula autenticação e define isAuthenticated como true
-    setIsAuthenticated(true);
-  };
-
+const HomePage: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-screen bg-teal-500">
-      <h1 className="text-5xl font-serif font-bold text-white my-8 text-center">Login</h1>
+    <div className="flex flex-col items-center justify-center h-screen w-screen bg-teal-500 p-4 text-center">
+      <h1 className="text-5xl font-serif font-bold text-white my-8">Welcome to Private Bills</h1>
 
-      <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-96">
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-teal-900 mb-1">Email:</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="border border-teal-700 p-2 w-full rounded-lg"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-teal-900 mb-1">Senha:</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="border border-teal-700 p-2 w-full rounded-lg"
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-          
-          <button
-            type="submit"
-            className="bg-green-300 text-teal-900 font-bold border border-black rounded-lg px-4 py-2 hover:bg-green-400"
-          >
-            Login
-          </button>
-        </form>
+      <section className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-full max-w-4xl mb-8">
+        <h2 className="text-4xl font-bold text-teal-900 mb-4">What We Offer</h2>
+        <p className="text-lg text-teal-900 mb-4">
+           Private Bills is the innovative solution that connects the growing community of Bitcoin-first users with those looking to acquire Bitcoin in a practical and direct way.
+        </p>
+        <p className="text-lg text-teal-900 mb-4">
+          If you’re a Bitcoin holder needing to pay bills like rent and utilities, our platform allows you to do so without converting your bitcoins into fiat.
+        </p>
+        <p className="text-lg text-teal-900 mb-4">
+          Simply upload your bills and let other users eager to acquire Bitcoin take care of the payments. In return, they receive satoshis via the Lightning Network along with an additional incentive set by the bill owner.
+        </p>
+        <p className="text-lg text-teal-900 mb-4">
+          With a reputation system to ensure trust and flexible bonus rates, Private Bills creates a win-win scenario for both parties.
+        </p>
+        <h2 className="text-lg font-bold text-teal-900 mb-4">Join us and transform the way you handle your bills and Bitcoin!</h2>
+      </section>
 
-        {/* Link condicional com base em isAuthenticated */}
-        {isAuthenticated && (
-          <Link href="/tasks">
-            <p className="text-center text-teal-900 font-bold mt-4">Redirecionando para Tasks...</p>
-          </Link>
-        )}
-      </div>
-
-      <div style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: 1000 }}>
-        <Link href="/tasks">
-          <button
-            className="bg-[#ADD8E6] text-gray-700 font-bold py-2 px-4 rounded-lg border-2 border-black flex items-center justify-between hover:bg-[#87CEEB]"
-            style={{ padding: '30px 60px', fontSize: '30px', borderRadius: '5px', textAlign: 'center' }}
-          >
-            Ir para tasks (só de testes)
-          </button>
-        </Link>
-      </div>
+      <Link href="/login">
+        <button className="bg-yellow-300 text-teal-900 font-bold border border-black rounded-lg px-12 py-6 hover:bg-yellow-400 text-3xl">
+          Get Started
+        </button>
+      </Link>
     </div>
   );
 };
 
-export default LoginPage;
+export default HomePage;
