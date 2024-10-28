@@ -26,7 +26,7 @@ model Bill {
   amount        Float
   dueDate       DateTime
   paymentType   String
-  paymentCode   String?
+  paymentQrCode String?
   status        String
   bonusRate     Float
   currency      String

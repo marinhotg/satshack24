@@ -32,7 +32,6 @@ class BillService {
       },
     };
 
-    if (billInput.paymentCode) data.paymentCode = billInput.paymentCode;
     if (billInput.fileKey) data.fileKey = billInput.fileKey;
     if (billInput.fileName) data.fileName = billInput.fileName;
     if (billInput.fileType) data.fileType = billInput.fileType;
@@ -153,6 +152,16 @@ class BillService {
         paidAt: new Date(),
         invoiceId,
         paymentHash,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async updateQrCode(id: number, qrCode: string) {
+    return prisma.bill.update({
+      where: { id },
+      data: {
+        paymentQrCode: qrCode,
         updatedAt: new Date(),
       },
     });
