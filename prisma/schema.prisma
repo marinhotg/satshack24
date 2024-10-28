@@ -3,17 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id            Int      @id @default(autoincrement())
   email         String   @unique
-  name          String?
+  senha         String   
+  name          String
+  nodeId        String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  totalUploaded Int      @default(0)
   totalPaid     Int      @default(0)
   averageRating Float    @default(0)
   reservedBills Bill[]   @relation("ReservedBills")
@@ -25,22 +26,21 @@ model Bill {
   id            Int       @id @default(autoincrement())
   amount        Float
   dueDate       DateTime
-  paymentType   String
-  paymentQrCode String?
   status        String
   bonusRate     Float
-  currency      String
-  fileKey       String?
-  fileName      String?
-  fileType      String?
+  currency      String  
+  fileUrl       String?
+  filePathname  String?
+  fileUploadedAt DateTime?
+  receiptUrl    String?
+  receiptPathname String?
+  receiptUploadedAt DateTime?
   uploadedBy    Int
   reservedBy    Int?
   reservedUntil DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   paidAt        DateTime?
-  invoiceId     String?
-  paymentHash   String?
   reserver      User?     @relation("ReservedBills", fields: [reservedBy], references: [id])
   uploader      User      @relation("UploadedBills", fields: [uploadedBy], references: [id])
   rating        Rating?
