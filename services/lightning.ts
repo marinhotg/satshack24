@@ -1,8 +1,10 @@
 import {
   AccountTokenAuthProvider,
   LightsparkClient,
-  BitcoinNetwork
+  BitcoinNetwork,
 } from "@lightsparkdev/lightspark-sdk";
+
+import QRCode from "qrcode";
 
 class LightningService {
   private client: LightsparkClient;
@@ -32,12 +34,23 @@ class LightningService {
 
   private async initializeNode(): Promise<void> {
     try {
-      await this.client.loadNodeSigningKey(this.nodeId, { 
-        password: this.nodePassword 
+      await this.client.loadNodeSigningKey(this.nodeId, {
+        password: this.nodePassword,
       });
     } catch (error) {
-      console.error('Failed to initialize node:', error);
-      throw new Error('Failed to initialize Lightning node');
+      console.error("Failed to initialize node:", error);
+      throw new Error("Failed to initialize Lightning node");
+    }
+  }
+
+  async generateInvoiceQRCode(encodedInvoice: string): Promise<string> {
+    try {
+      // Converte o invoice em um QR code no formato de URL data:image/png;base64
+      const qrCodeDataURL = await QRCode.toDataURL(encodedInvoice);
+      return qrCodeDataURL;
+    } catch (error) {
+      console.error("Failed to generate QR code:", error);
+      throw new Error("QR code generation failed");
     }
   }
 
@@ -55,8 +68,31 @@ class LightningService {
 
       return invoice;
     } catch (error) {
-      console.error('Failed to create invoice:', error);
-      throw new Error('Failed to create Lightning invoice');
+      console.error("Failed to create invoice:", error);
+      throw new Error("Failed to create Lightning invoice");
+    }
+  }
+
+  async createInvoiceForUser(
+    nodeId: string,
+    amountMsats: number,
+    memo: string
+  ): Promise<string> {
+    try {
+      const invoice = await this.client.createInvoice(
+        nodeId,
+        amountMsats,
+        memo
+      );
+
+      if (!invoice) {
+        throw new Error("Unable to create the invoice.");
+      }
+
+      return invoice;
+    } catch (error) {
+      console.error("Failed to create invoice:", error);
+      throw new Error("Failed to create Lightning invoice");
     }
   }
 
@@ -74,8 +110,8 @@ class LightningService {
 
       return payment;
     } catch (error) {
-      console.error('Failed to pay invoice:', error);
-      throw new Error('Failed to complete Lightning payment');
+      console.error("Failed to pay invoice:", error);
+      throw new Error("Failed to complete Lightning payment");
     }
   }
 
@@ -98,11 +134,11 @@ class LightningService {
 
       return {
         transactions: transactionsConnection.entities,
-        count: transactionsConnection.count
+        count: transactionsConnection.count,
       };
     } catch (error) {
-      console.error('Failed to get transactions:', error);
-      throw new Error('Failed to fetch transactions');
+      console.error("Failed to get transactions:", error);
+      throw new Error("Failed to fetch transactions");
     }
   }
 }
