@@ -21,12 +21,14 @@ const BillCard: React.FC<BillCardProps> = ({
     switch (status.toLowerCase()) {
       case "completed":
         return "bg-green-500";
+      case "pending":
+        return "bg-orange-300";
       case "reserved":
         return "bg-red-300";
       case "processing":
         return "bg-yellow-300";
       case "approved":
-        return "bg-blue-500";
+        return "bg-blue-300";
       default:
         return "bg-gray-300";
     }
@@ -47,7 +49,7 @@ const BillCard: React.FC<BillCardProps> = ({
       case 'reserved':
         return (
           <button
-            className="bg-gray-300 text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+            className="bg-red-300 text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
             disabled
           >
             Wait the Paid
@@ -55,21 +57,24 @@ const BillCard: React.FC<BillCardProps> = ({
         );
       case 'processing':
         return (
-          <Link href={`yourbills/refoundbill/${billNumber}`}>
-            <button className="bg-green-500 hover:bg-green-600 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
-              Make the Refound
+          <Link href={`yourbills/approvebill/${billNumber}`}>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Approve Receipt
             </button>
           </Link>
         );
       case 'approved':
         return (
-          <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
-            Wait for the rating
-          </button>
+          <Link href={`yourbills/refoundbill/${billNumber}`}>
+            <button className="bg-blue-400 hover:bg-blue-500 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Make the Refound
+            </button>
+          </Link>
         );
       case 'completed':
         return (
-          <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+          <button className="bg-green-400 hover:bg-green-500 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed" 
+          disabled>
             Finish
           </button>
         );

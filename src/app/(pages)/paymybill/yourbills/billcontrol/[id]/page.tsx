@@ -162,14 +162,14 @@ const ChangeBill: React.FC<ChangeBillProps> = ({ params }) => {
         <button
           onClick={handleSaveChanges}
           disabled={isSaving}
-          className={`bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`bg-[#FADA5E] hover:bg-[#fa8c5e] text-black font-mono font-bold py-2 px-4 rounded-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
 
       <div className="fixed bottom-4 left-4">
-        <Link href="/yourbills">
+        <Link href="/paymybill/yourbills">
           <button className="bg-[#FFFAA0] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
             Go Back
           </button>
