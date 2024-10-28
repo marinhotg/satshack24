@@ -90,16 +90,24 @@ class BillService {
   }
 
   async listReservedAndPaidedBills(userId: number) {
+    console.log("userId:", userId);
     return prisma.bill.findMany({
       where: {
-        reservedBy: userId,
-        status: {
-          in: ["RESERVED", "PAID"],
-        },
+        AND: [
+          {
+            OR: [{ uploadedBy: userId }, { reservedBy: userId }],
+          },
+          {
+            NOT: {
+              status: "PENDING",
+            },
+          },
+        ],
       },
       include: {
         uploader: true,
         reserver: true,
+        rating: true,
       },
       orderBy: {
         dueDate: "asc",
@@ -149,6 +157,17 @@ class BillService {
       },
     });
   }
+
+  //   async updateBillTimeout(id: number, timeout: number) {
+  //     return prisma.bill.update({
+  //       where: { id },
+  //       data: {
+  //         status: "PAID",
+  //         reservedTimeout: timeout,
+  //         updatedAt: new Date(),
+  //       },
+  //     });
+  //   }
 }
 
 export const billService = new BillService();
