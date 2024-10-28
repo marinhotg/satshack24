@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
-    const billId = parseInt(params.id);
+    // Obtém o 'id' diretamente da URL
+    const id = request.nextUrl.pathname.split("/").pop();
+    if (!id) {
+      return NextResponse.json(
+        { error: "Bill ID is missing" },
+        { status: 400 }
+      );
+    }
+
+    const billId = parseInt(id);
     const { receiptUrl, receiptPathname } = await request.json();
 
     // Verificar se a bill existe e pode ser atualizada

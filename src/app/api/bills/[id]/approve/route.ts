@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
-    const billId = parseInt(params.id);
+    const id = request.nextUrl.pathname.split("/").pop();
+    if (!id) {
+      return NextResponse.json(
+        { error: "Bill ID is missing" },
+        { status: 400 }
+      );
+    }
+
+    const billId = parseInt(id);
 
     const existingBill = await prisma.bill.findUnique({
       where: { id: billId },
@@ -36,7 +41,6 @@ export async function POST(
       );
     }
 
-    // Atualizar a bill para aprovada
     const updatedBill = await prisma.bill.update({
       where: { id: billId },
       data: {
