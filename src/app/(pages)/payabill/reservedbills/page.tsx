@@ -24,7 +24,6 @@ const ReservedBills = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
   const [userId, setUserId] = useState<number>(1);
 
-  // Dados de teste para faturas reservadas, incluindo os novos status
 
   useEffect(() => {
     const fetchReservedBills = async () => {
@@ -54,7 +53,7 @@ const ReservedBills = () => {
       case "pending":
       case "reserved":
         return "bg-red-300";
-      case "wait payment":
+      case "Paid":
         return "bg-yellow-300";
       default:
         return "bg-gray-300";
@@ -126,9 +125,9 @@ const ReservedBills = () => {
           className="bg-white border-2 border-black rounded-lg p-2"
         >
           <option value="All">All</option>
-          <option value="Reserved">Reserved</option>
+          <option value="RESERVED">Reserved</option>
           <option value="Ready for Withdraw">Ready for Withdraw</option>
-          <option value="Wait Payment">Wait Payment</option>
+          <option value="Paid">Wait Payment</option>
         </select>
       </div>
 
@@ -167,33 +166,27 @@ const ReservedBills = () => {
               </div>
 
               <div className="flex justify-around mt-4">
-                {bill.status === "Reserved" && (
-                  <Link href={`payabill/reservedbills/billdetails/${bill.id}`}>
-                    <button className="bg-red-500 hover:bg-red-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+                {bill.status === "RESERVED" && (
+                  <Link href={`reservedbills/billdetails/${bill.id}`}>
+                    <button className="bg-red-500 hover:bg-red-600 text-white font-mono font-bold py-2 px-20 rounded-lg border-2 border-black">
                       Pay
                     </button>
                   </Link>
                 )}
                 {bill.status === "Ready for Withdraw" && (
-                  <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
-                    Withdraw
-                  </button>
-                )}
-                {bill.status === "Wait Payment" && (
-                  <>
-                    <button
-                      className="bg-gray-500 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed mr-2"
-                      disabled
-                    >
-                      Pay
-                    </button>
-                    <button
-                      className="bg-gray-500 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
-                      disabled
-                    >
+                  <Link href={`/reservedbills/billwithdraw/${bill.id}`}>
+                    <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
                       Withdraw
                     </button>
-                  </>
+                  </Link>
+                )}
+                {bill.status === "Paid" && (
+                  <button
+                    className="bg-gray-500 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+                    disabled
+                  >
+                    Wait for the refound
+                  </button>
                 )}
               </div>
             </div>
