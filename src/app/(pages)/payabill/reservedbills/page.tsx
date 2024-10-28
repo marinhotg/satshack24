@@ -22,7 +22,7 @@ const ReservedBills = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
-  const [userId, setUserId] = useState<number>(1);
+  //const [userId, setUserId] = useState<number>(1);
 
 
   useEffect(() => {
