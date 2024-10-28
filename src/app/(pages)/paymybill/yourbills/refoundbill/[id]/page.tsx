@@ -104,7 +104,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
             <button
               onClick={handleRefound}
               disabled={isPaying}
-              className="w-full bg-blue-400 hover:bg-blue-500 text-black font-mono font-bold py-2 px-4 rounded-lg hover:bg-green-600 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-400 hover:bg-green-600 text-black font-mono font-bold py-2 px-4 rounded-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPaying ? 'Processing...' : 'Make Refound'}
             </button>
