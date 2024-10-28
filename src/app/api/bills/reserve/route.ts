@@ -1,22 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { billService } from "@/services/bill";
 
-export const dynamic = 'force-dynamic';
+const FIXED_USER_ID = 1; 
 
-const FIXED_USER_ID = 1;
-
-export async function POST(
-  request: NextRequest
-): Promise<NextResponse> {
+export async function POST(req: Request) {
   try {
-    const { billId, reservationTime } = await request.json();
-
-    if (!billId || !reservationTime) {
-      return NextResponse.json(
-        { error: 'billId and reservationTime are required' },
-        { status: 400 }
-      );
-    }
+    const { billId, reservationTime } = await req.json();
 
     const bill = await billService.reserveBill(
       Number(billId),
