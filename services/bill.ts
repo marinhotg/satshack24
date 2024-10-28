@@ -145,14 +145,12 @@ class BillService {
     });
   }
 
-  async markAsPaid(id: number, invoiceId: string, paymentHash: string) {
+  async markAsPaid(id: number) {
     return prisma.bill.update({
       where: { id },
       data: {
         status: "PAID",
         paidAt: new Date(),
-        invoiceId,
-        paymentHash,
         updatedAt: new Date(),
       },
     });

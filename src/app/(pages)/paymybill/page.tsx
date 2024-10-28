@@ -178,14 +178,15 @@ export default function PayBillPage() {
           </div>
 
           <div className="flex flex-col items-center space-y-2 mt-4">
-            <input
-              type="file"
-              name="billFile"
-              onChange={handleFileChange}
-              className="hidden"
-              id="upload-bill"
-              required
-            />
+          <input
+            type="file"
+            name="billFile"
+            onChange={handleFileChange}
+            className="opacity-0 absolute"
+            id="upload-bill"
+            required
+            aria-label="Upload bill file"
+          />
             <label
               htmlFor="upload-bill"
               className="w-40 h-12 bg-[#FFD700] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold text-center py-2 px-4 rounded-lg border-2 border-black cursor-pointer flex items-center justify-center"
