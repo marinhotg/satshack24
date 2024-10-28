@@ -7,7 +7,12 @@ interface Bill {
   amount: number;
   currency: string;
   dueDate: string;
+  bonusRate: number;
+  address: string;
   status: string;
+  uploader: {
+    name: string;
+  };
 }
 
 const ReservedBills = () => {
@@ -17,78 +22,6 @@ const ReservedBills = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
 
   // Dados de teste para faturas reservadas, incluindo os novos status
-  const teste_reserva: Bill[] = [
-    {
-      id: 1,
-      amount: 150.0,
-      currency: "USD",
-      dueDate: "2024-11-01",
-      status: "Reserved",
-    },
-    {
-      id: 2,
-      amount: 250.5,
-      currency: "EUR",
-      dueDate: "2024-11-10",
-      status: "Reserved",
-    },
-    {
-      id: 3,
-      amount: 300.75,
-      currency: "BRL",
-      dueDate: "2024-11-15",
-      status: "Reserved",
-    },
-    {
-      id: 4,
-      amount: 120.0,
-      currency: "USD",
-      dueDate: "2024-11-20",
-      status: "Ready for Withdraw",
-    },
-    {
-      id: 5,
-      amount: 75.99,
-      currency: "EUR",
-      dueDate: "2024-11-25",
-      status: "Wait Payment",
-    },
-    {
-      id: 6,
-      amount: 450.0,
-      currency: "BRL",
-      dueDate: "2024-11-30",
-      status: "Reserved",
-    },
-    {
-      id: 7,
-      amount: 600.2,
-      currency: "USD",
-      dueDate: "2024-12-05",
-      status: "Reserved",
-    },
-    {
-      id: 8,
-      amount: 89.99,
-      currency: "EUR",
-      dueDate: "2024-12-10",
-      status: "Ready for Withdraw",
-    },
-    {
-      id: 9,
-      amount: 320.0,
-      currency: "USD",
-      dueDate: "2024-12-15",
-      status: "Wait Payment",
-    },
-    {
-      id: 10,
-      amount: 200.75,
-      currency: "BRL",
-      dueDate: "2024-12-20",
-      status: "Reserved",
-    },
-  ];
 
   useEffect(() => {
     const fetchReservedBills = async () => {
