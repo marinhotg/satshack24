@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+#
+# Private Bills
 
-## Getting Started
+### Central problem
+There's a growing community of Bitcoin-first users who prefer to hold and use only Bitcoin, but still face the reality of needing to pay bills in fiat currency (rent, utilities, etc.). At the same time, there are people wanting to acquire Bitcoin in a P2P way, avoiding centralized exchanges and complex KYC processes. 
 
-First, run the development server:
+Currently, these two groups can't easily help each other: Bitcoin holders can't easily pay their bills without first converting to fiat, while potential Bitcoin buyers lack simple ways to acquire it while earning additional rewards.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+#
+### Project Overview
+Private Bills is a platform that connects these two groups in a practical way: Bitcoin holders can upload their bills to be paid in fiat, while those wanting to acquire Bitcoin can pay these bills and receive satoshis via Lightning Network plus a bonus incentive set by the bill owner. 
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The platform features a reputation system for trust, and flexible bonus rates set by bill owners. This creates a win-win solution where Bitcoin holders can maintain their Bitcoin-only lifestyle while paying necessary bills, and payers can acquire Bitcoin directly while earning extra rewards for their service.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#
+### Technologies Used
+- #### Next.js
+    - **Version**: 15.0.1
+    - **Description**: A powerful React framework for building server-rendered and statically generated applications.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- #### React
+    - **Version**: 19.0.0-rc
+    - **Description**: A JavaScript library for building user interfaces. React allows developers to create reusable UI components and manage the application state efficiently.
 
-## Learn More
+- #### Vercel 
+    - **Description**: Platform for deploying and hosting Next.js applications.
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- #### Prisma
+    - **Version**: 5.21.1
+    - **Description**: An Object-Relational Mapping (ORM) tool that simplifies database access and management. It allows for type-safe database queries and schema migrations.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+- #### Lightspark SDK
+    - **Version**: 1.8.8
+    - **Description**: A software development kit for integrating Lightspark's cryptocurrency payment solutions into the application.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#
+### Deployment Link
+[Private Bills](https://satshack24.vercel.app/)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+#
+### Installation and Local Execution
+
+1. Clone this repository:
+    ```bash
+    git clone https://github.com/marinhotg/satshack24.git
+    cd satshack24/
+    ```
+2. Install dependencies
+    ```bash
+    npm install
+
+    npx prisma migrate deploy
+
+    npx prisma generate
+    ```
+3. Add your database in **.env** file like this in **.env.example**
+
+
+4. Start the server locally
+   ```bash
+   npm run dev
+   ```
+5. Access http://localhost:3000
