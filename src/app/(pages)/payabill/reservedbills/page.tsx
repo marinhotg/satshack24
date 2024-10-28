@@ -46,14 +46,14 @@ const ReservedBills = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "completed":
-        return "bg-green-500";
       case "reserved":
         return "bg-red-300";
       case "processing":
         return "bg-yellow-300";
       case "approved":
-        return "bg-blue-500";
+        return "bg-blue-300";
+      case "completed":
+        return "bg-green-500";
       default:
         return "bg-gray-300";
     }
@@ -125,9 +125,9 @@ const ReservedBills = () => {
         >
           <option value="All">All</option>
           <option value="RESERVED">Reserved</option>
-          <option value="PROCESSING">Processing - Wait Payment</option>
-          <option value="APPROVED">Approved - Make the rating </option>
-          <option value="COMPLETED">Completed</option>
+          <option value="PROCESSING">Processing - Wait for approving</option>
+          <option value="APPROVED">Approved - Wait for payment </option>
+          <option value="COMPLETED">Make the rating</option>
         </select>
       </div>
 
@@ -173,28 +173,29 @@ const ReservedBills = () => {
                     </button>
                   </Link>
                 )}
+                {bill.status === "PROCESSING" && (
+                  <button
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+                    disabled
+                  >
+                    Wait for approving
+                  </button>
+                )}
                 {bill.status === "APPROVED" && (
+                  <button
+                    className="bg-blue-400 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+                    disabled>
+                    Wait for payment
+                  </button>
+
+
+                )}
+                {bill.status === "COMPLETED" && (
                   <Link href={`reservedbills/billrate/${bill.id}`}>
                     <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
                       Rate the process
                     </button>
                   </Link>
-                )}
-                {bill.status === "PROCESSING" && (
-                  <button
-                    className="bg-gray-500 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
-                    disabled
-                  >
-                    Wait for the refound
-                  </button>
-                )}
-                {bill.status === "COMPLETED" && (
-                  <button
-                    className="bg-green-500 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
-                    disabled
-                  >
-                    Completed
-                  </button>
                 )}
               </div>
             </div>
