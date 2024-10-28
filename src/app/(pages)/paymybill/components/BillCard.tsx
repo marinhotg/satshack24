@@ -20,9 +20,8 @@ const BillCard: React.FC<BillCardProps> = ({
     switch (status.toLowerCase()) {
       case 'paid':
         return 'bg-green-300';
-      case 'ready for withdraw':
-        return 'bg-green-500';
       case 'pending':
+        return 'bg-orange-300';
       case 'reserved':
         return 'bg-red-300';
       case 'wait payment':
@@ -33,6 +32,45 @@ const BillCard: React.FC<BillCardProps> = ({
   };
 
   const formattedDate = new Date(dueDate).toLocaleDateString();
+
+  const renderActionButton = () => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return (
+          <Link href={`yourbills/billcontrol/${billNumber}`}>
+            <button className="bg-[#FADA5E] hover:bg-[#fa8c5e] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Change the Bill
+            </button>
+          </Link>
+        );
+      case 'reserved':
+        return (
+          <button
+            className="bg-gray-300 text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
+            disabled
+          >
+            Wait the Paid
+          </button>
+        );
+      case 'paid':
+        return (
+          <Link href={`yourbills/refoundbill/${billNumber}`}>
+            <button className="bg-green-500 hover:bg-green-600 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+              Make the Refound
+            </button>
+          </Link>
+        );
+      case 'expired':
+      case 'completed':
+        return (
+          <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+            Finish
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex justify-center p-4">
@@ -52,11 +90,7 @@ const BillCard: React.FC<BillCardProps> = ({
           <span className="font-bold">Due Date:</span> {formattedDate}
         </div>
 
-        <Link href={`yourbills/billcontrol/${billNumber}`}>
-          <button className="bg-[#FADA5E] hover:bg-[#fa8c5e] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
-            Select Bill
-          </button>
-        </Link>
+        <div className="mt-4">{renderActionButton()}</div>
       </div>
     </div>
   );

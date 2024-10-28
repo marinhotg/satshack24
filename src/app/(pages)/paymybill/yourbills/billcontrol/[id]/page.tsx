@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { getCurrencyList } from '@/src/app/(pages)/paymybill/components/currencyList';
 import Link from 'next/link';
 
-interface BillControlProps {
+interface ChangeBillProps {
   params: Promise<{ id: string }>;
 }
 
@@ -14,16 +14,9 @@ interface Bill {
   dueDate: string;
   bonusRate: number;
   status: string;
-  uploader: {
-    name: string;
-  };
-  reserver?: {
-    name: string;
-  };
-  reservedUntil?: string;
 }
 
-const BillControl: React.FC<BillControlProps> = ({ params }) => {
+const ChangeBill: React.FC<ChangeBillProps> = ({ params }) => {
   const [id, setId] = useState<string | null>(null);
   const [bill, setBill] = useState<Bill | null>(null);
   const [amount, setAmount] = useState<number>(0);
@@ -33,7 +26,6 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isPaying, setIsPaying] = useState(false);
 
   const currencyList = getCurrencyList();
 
@@ -49,9 +41,8 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
 
       try {
         const response = await fetch(`/api/bills/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch bill details');
-        }
+        if (!response.ok) throw new Error('Failed to fetch bill details');
+        
         const data = await response.json();
         setBill(data);
         setAmount(data.amount);
@@ -68,54 +59,17 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
     fetchBillDetails();
   }, [id]);
 
-  const handlePayment = async () => {
-    if (!id) return;
-    setIsPaying(true);
-    try {
-      const response = await fetch(`/api/bills/${id}/pay`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          invoiceId: 'dummy-invoice', // Para o MVP
-          paymentHash: 'dummy-hash', // Para o MVP
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to process payment');
-      }
-
-      alert('Payment processed successfully!');
-      window.location.href = '/yourbills'; // Redireciona após o pagamento
-    } catch (err) {
-      console.error('Failed to process payment:', err);
-      alert('Failed to process payment. Please try again.');
-    } finally {
-      setIsPaying(false);
-    }
-  };
-
   const handleSaveChanges = async () => {
     if (!id) return;
     setIsSaving(true);
     try {
-      // Por enquanto, apenas atualizamos o status para o MVP
       const response = await fetch(`/api/bills/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: 'PENDING', // Para o MVP, sempre volta para PENDING
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'PENDING' })
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to save changes');
-      }
-
+      if (!response.ok) throw new Error('Failed to save changes');
+      
       alert('Changes saved successfully!');
     } catch (err) {
       console.error('Failed to save changes:', err);
@@ -157,18 +111,9 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen w-screen bg-teal-500 pt-16">
-      <h1 className="text-4xl font-serif font-bold text-white my-8">Bill Control - Bill ID: {id}</h1>
+      <h1 className="text-4xl font-serif font-bold text-white my-8">Change Bill - Bill ID: {id}</h1>
 
       <div className="bg-[#FFFAA0] w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black">
-        <div className="mb-4">
-          <p className="text-lg font-bold text-gray-700">Status: {bill.status}</p>
-          {bill.reservedUntil && (
-            <p className="text-sm text-gray-600">
-              Reserved until: {new Date(bill.reservedUntil).toLocaleString()}
-            </p>
-          )}
-        </div>
-
         <div className="mb-3">
           <label className="block font-bold mb-1">Bonus Rate:</label>
           <input
@@ -214,27 +159,17 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
           />
         </div>
 
-        <div className="flex flex-col space-y-3 mt-4">
-          <button
-            onClick={handlePayment}
-            disabled={isPaying || bill.status === 'PAID'}
-            className={`bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            {isPaying ? 'Processing...' : 'Make Payment'}
-          </button>
-
-          <button
-            onClick={handleSaveChanges}
-            disabled={isSaving}
-            className={`bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
+        <button
+          onClick={handleSaveChanges}
+          disabled={isSaving}
+          className={`bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </button>
       </div>
 
       <div className="fixed bottom-4 left-4">
-        <Link href="/paymybill/yourbills">
+        <Link href="/yourbills">
           <button className="bg-[#FFFAA0] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
             Go Back
           </button>
@@ -244,4 +179,4 @@ const BillControl: React.FC<BillControlProps> = ({ params }) => {
   );
 };
 
-export default BillControl;
+export default ChangeBill;
