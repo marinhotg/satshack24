@@ -1,30 +1,22 @@
-// src/pages/api/updateQrCode.ts
-import { NextApiRequest, NextApiResponse } from "next";
-import { billService } from "@/services/bill"; // Supondo que tenha o QR code em `lightningService`
+import { NextRequest, NextResponse } from "next/server";
+import { billService } from "@/services/bill"; 
 
-export default async function POST(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
-    try {
-      const { id, qrCode } = req.body;
+export async function POST(req: NextRequest) {
+  try {
+    const { id, qrCode } = await req.json();
 
-      // Verifica se o id e o qrCode foram fornecidos
-      if (!id || !qrCode) {
-        return res.status(400).json({ error: "ID e QR Code são obrigatórios" });
-      }
-
-      // Atualiza o QR code na tabela `bill`
-      const updatedBill = await billService.updateQrCode(id, qrCode);
-
-      res.status(200).json({
-        message: "QR Code atualizado com sucesso",
-        bill: updatedBill,
-      });
-    } catch (error) {
-      console.error("Erro ao atualizar o QR code:", error);
-      res.status(500).json({ error: "Erro ao atualizar o QR code" });
+    if (!id || !qrCode) {
+      return NextResponse.json({ error: "ID e QR Code são obrigatórios" }, { status: 400 });
     }
-  } else {
-    res.setHeader("Allow", ["POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+
+    const updatedBill = await billService.updateQrCode(id, qrCode);
+
+    return NextResponse.json({
+      message: "QR Code atualizado com sucesso",
+      bill: updatedBill,
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar o QR code:", error);
+    return NextResponse.json({ error: "Erro ao atualizar o QR code" }, { status: 500 });
   }
 }

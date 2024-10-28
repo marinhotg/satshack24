@@ -5,7 +5,7 @@ interface CreateBillInput {
   amount: number;
   dueDate: Date;
   paymentType: string;
-  paymentCode?: string;
+  paymentQrCode?: string;
   bonusRate: number;
   currency: string;
   fileKey?: string;
