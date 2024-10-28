@@ -6,7 +6,6 @@ import Link from 'next/link';
 interface Bill {
   id: number;
   amount: number;
-  paymentType: string;
   currency: string;
   dueDate: string;
   bonusRate: number;
@@ -117,7 +116,6 @@ const BillDetailsPage = () => {
       <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-96">
         <h2 className="text-2xl font-bold text-teal-900 mb-2">Bill ID: {bill.id}</h2>
         <p className="text-lg text-teal-800">Value: {bill.amount.toFixed(2)} {bill.currency}</p>
-        <p className="text-lg text-teal-800">Payment Type: {bill.paymentType}</p>
         <p className="text-lg text-teal-800">Due Date: {new Date(bill.dueDate).toLocaleDateString()}</p>
         <p className="text-lg text-teal-800">Bonus Rate: {bill.bonusRate.toFixed(2)}%</p>
         <p className="text-lg text-teal-800">Status: {bill.status}</p>

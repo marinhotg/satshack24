@@ -3,8 +3,23 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import logo from './image/logo.png';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const HomePage: React.FC = () => {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.push('/tasks');
+    }
+  }, [user, router]);
+
+  if (user) {
+    return null;
+  }
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen text-center p-4">
       {/* Título centralizado */}
