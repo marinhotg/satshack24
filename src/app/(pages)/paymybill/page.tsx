@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { createBill } from "./actions";
 import { getCurrencyList } from './components/currencyList';
+import { upload } from '@vercel/blob/client';
 
 export default function PayBillPage() {
   const currencyOptions = getCurrencyList();
@@ -11,13 +12,30 @@ export default function PayBillPage() {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(currencyOptions[0].code);
+  const [billFile, setBillFile] = useState<File | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setIsSubmitting(true);
     setError("");
     setSuccess(false);
 
+    if (!billFile) {
+      setError("Please attach a bill file before submitting.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
+      const newBlob = await upload(billFile.name, billFile, {
+        access: 'public',
+        handleUploadUrl: '/api/bills/upload-bill',
+      });
+
+      setBlobUrl(newBlob.url);
+
+      formData.append("billFile", newBlob.url);
+
       const result = await createBill(formData);
       
       if (result.error) {
@@ -27,6 +45,8 @@ export default function PayBillPage() {
         const form = document.getElementById("billForm") as HTMLFormElement;
         form.reset();
         setSelectedCurrency(currencyOptions[0].code);
+        setBillFile(null); 
+        setBlobUrl(null); 
       }
     } catch (e) {
       console.error("Something went wrong:", e);
@@ -38,6 +58,13 @@ export default function PayBillPage() {
 
   const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCurrency(e.target.value);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBillFile(file);
+    }
   };
 
   return (
@@ -77,7 +104,7 @@ export default function PayBillPage() {
           </div>
         )}
 
-        <form id="billForm" action={handleSubmit} className="space-y-6">
+        <form id="billForm" onSubmit={(e) => { e.preventDefault(); handleSubmit(new FormData(e.currentTarget)); }} className="space-y-6">
           <div>
             <label className="block mb-2 text-gray-700 font-mono font-bold">
               Amount
@@ -151,12 +178,32 @@ export default function PayBillPage() {
             />
           </div>
 
+          <div className="flex flex-col items-center space-y-2 mt-4">
+            <input
+              type="file"
+              name="billFile"
+              onChange={handleFileChange}
+              className="hidden"
+              id="upload-bill"
+              required
+            />
+            <label
+              htmlFor="upload-bill"
+              className="w-40 h-12 bg-[#FFD700] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold text-center py-2 px-4 rounded-lg border-2 border-black cursor-pointer flex items-center justify-center"
+            >
+              Upload Bill
+            </label>
+            {billFile && (
+              <span className="text-gray-700 font-mono">{billFile.name}</span>
+            )}
+          </div>
+
           <button
             type="submit"
             disabled={isSubmitting}
             className={`w-full h-[8vh] bg-[#FADA5E] hover:bg-[#FFD700] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-gray ${
               isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } mt-4`}
           >
             {isSubmitting ? "Creating bill..." : `Submit (Using: ${selectedCurrency})`}
           </button>
