@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { billService } from "@/services/bill";
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(): Promise<NextResponse> {
   try {
     const bills = await billService.listPendingBills();
     return NextResponse.json(bills);
