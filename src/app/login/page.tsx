@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext'; 
 
 type LoginFormData = {
   email: string;
@@ -18,6 +19,7 @@ type SignupFormData = {
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [isSignup, setIsSignup] = useState(false);
   const [formData, setFormData] = useState<LoginFormData | SignupFormData>({
     email: '',
@@ -83,6 +85,8 @@ const LoginPage: React.FC = () => {
           throw new Error(data.error || 'Failed to create account');
         }
 
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
         router.push('/tasks');
       } else {
         const response = await fetch('/api/auth/login', {
@@ -102,6 +106,7 @@ const LoginPage: React.FC = () => {
           throw new Error(data.error || 'Invalid email or password');
         }
 
+        setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
         router.push('/tasks');
       }
