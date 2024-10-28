@@ -5,7 +5,7 @@ const FIXED_USER_ID = 1; // fixed user
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const bills = await billService.listUserBills(FIXED_USER_ID);
+    const bills = await billService.listReservedAndPaidedBills(FIXED_USER_ID);
     return NextResponse.json(bills);
   } catch (error) {
     console.error("Failed to fetch user bills:", error);

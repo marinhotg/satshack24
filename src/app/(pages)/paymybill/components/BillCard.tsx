@@ -20,11 +20,15 @@ const BillCard: React.FC<BillCardProps> = ({
     switch (status.toLowerCase()) {
       case 'paid':
         return 'bg-green-300';
+      case 'ready for withdraw': 
+        return 'bg-green-500'; 
       case 'pending':
       case 'reserved':
         return 'bg-red-300';
+      case 'wait payment':
+        return 'bg-yellow-300'; 
       default:
-        return 'bg-yellow-300';
+        return 'bg-gray-300'; 
     }
   };
 

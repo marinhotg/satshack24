@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getCurrencyList } from '../paymybill/components/currencyList';
-import { useRouter } from 'next/navigation';
 
 interface Bill {
   id: number;
@@ -53,7 +52,6 @@ const BillCard = ({
 };
 
 const BillSelectionPage = () => {
-  const router = useRouter();
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [minValue, setMinValue] = useState('');
@@ -108,7 +106,7 @@ const BillSelectionPage = () => {
         throw new Error('Failed to reserve bill');
       }
 
-      router.push(`/payabill/billdetails/${billId}`);
+      <Link href={`/payabill/reservedbills`}></Link>;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reserve bill');
       setSelectedBill(null);
@@ -184,13 +182,21 @@ const BillSelectionPage = () => {
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-teal-500">
       <h1 className="text-4xl font-serif font-bold text-white my-4 text-center">That&apos;s on me!</h1>
 
-      <div className="flex justify-center items-center mb-4 px-6">
+      <div className="flex flex-col justify-center items-center mb-4 px-6 gap-4">
         <button
-          className="bg-[#ADD8E6] hover:bg-[#87CEEB] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black flex items-center justify-between"
+          className="bg-[#ADD8E6] hover:bg-[#87CEEB] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black"
           onClick={() => setShowFilter(!showFilter)}
         >
           Filter
         </button>
+      </div>
+
+      <div className="flex justify-center mt-2 w-full px-6">
+        <Link href="payabill/reservedbills">
+          <button className="bg-[#a0d5ff] hover:bg-[#a0a6ff] text-gray-700 font-mono font-bold py-2 px-6 rounded-lg border-2 border-black w-full max-w-sm">
+            Go to Reserved Bills
+          </button>
+        </Link>
       </div>
 
       {showFilter && (
