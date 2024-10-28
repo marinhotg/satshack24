@@ -46,14 +46,11 @@ const ReservedBills = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "paid":
-        return "bg-green-300";
-      case "ready for withdraw":
+      case "COMPLETED":
         return "bg-green-500";
-      case "pending":
       case "reserved":
         return "bg-red-300";
-      case "Paid":
+      case "PAID":
         return "bg-yellow-300";
       default:
         return "bg-gray-300";
@@ -126,8 +123,8 @@ const ReservedBills = () => {
         >
           <option value="All">All</option>
           <option value="RESERVED">Reserved</option>
-          <option value="Ready for Withdraw">Ready for Withdraw</option>
-          <option value="Paid">Wait Payment</option>
+          <option value="COMPLETED">Ready for Withdraw</option>
+          <option value="PAID">Wait Payment</option>
         </select>
       </div>
 
@@ -173,14 +170,14 @@ const ReservedBills = () => {
                     </button>
                   </Link>
                 )}
-                {bill.status === "Ready for Withdraw" && (
+                {bill.status === "COMPLETED" && (
                   <Link href={`reservedbills/billwithdraw/${bill.id}`}>
                     <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
                       Withdraw
                     </button>
                   </Link>
                 )}
-                {bill.status === "Paid" && (
+                {bill.status === "PAID" && (
                   <button
                     className="bg-gray-500 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
                     disabled

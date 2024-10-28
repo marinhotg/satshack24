@@ -15,6 +15,7 @@ const YourBills = () => {
   const [bills, setBills] = useState<Bill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -34,6 +35,14 @@ const YourBills = () => {
 
     fetchBills();
   }, []);
+
+  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(event.target.value);
+  };
+
+  const filteredBills = bills.filter((bill) =>
+    statusFilter === 'all' ? true : bill.status.toLowerCase() === statusFilter
+  );
 
   if (isLoading) {
     return (
@@ -74,13 +83,30 @@ const YourBills = () => {
     <div className="flex flex-col items-center h-screen w-screen bg-teal-500 pt-16">
       <h1 className="text-4xl font-serif font-bold text-white my-8">Your Bills</h1>
       
-      {bills.length === 0 ? (
+      <div className="mb-8">
+        <label htmlFor="statusFilter" className="text-white font-bold mr-4">Filter by Status:</label>
+        <select
+          id="statusFilter"
+          value={statusFilter}
+          onChange={handleFilterChange}
+          className="bg-white text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black"
+        >
+          <option value="all">All</option>
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+          <option value="reserved">Reserved</option>
+          <option value="expired">Expired</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
+      {filteredBills.length === 0 ? (
         <div className="bg-[#FFFAA0] rounded-lg border-2 border-black p-8 shadow-lg">
           <p className="text-2xl font-mono font-bold text-gray-700">No bills found</p>
         </div>
       ) : (
         <div className="flex flex-wrap justify-center gap-6 w-full max-w-6xl px-4 lg:px-16">
-          {bills.map(bill => (
+          {filteredBills.map((bill) => (
             <div className="flex-shrink-0 w-full sm:w-[30%] lg:w-[30%] mx-2" key={bill.id}>
               <BillCard
                 billNumber={bill.id}
