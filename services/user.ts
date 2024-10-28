@@ -43,6 +43,13 @@ export class UserService {
     });
   }
 
+  // Buscar usuário por email
+  async getUserByEmail(email: string): Promise<PrismaUser | null> {
+    return prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
   // Atualizar usuário
   async updateUser(
     userId: number,
