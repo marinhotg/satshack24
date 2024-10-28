@@ -5,9 +5,16 @@ import Link from "next/link";
 interface Bill {
   id: number;
   amount: number;
+  paymentType: string;
   currency: string;
   dueDate: string;
+  bonusRate: number;
   status: string;
+  uploader: {
+    name: string;
+  };
+  reservedUntil?: string;
+  paymentCode?: string;
 }
 
 const ReservedBills = () => {
@@ -161,9 +168,11 @@ const ReservedBills = () => {
 
               <div className="flex justify-around mt-4">
                 {bill.status === "Reserved" && (
-                  <button className="bg-red-500 hover:bg-red-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
-                    Pay
-                  </button>
+                  <Link href={`payabill/reservedbills/billdetails/${bill.id}`}>
+                    <button className="bg-red-500 hover:bg-red-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
+                      Pay
+                    </button>
+                  </Link>
                 )}
                 {bill.status === "Ready for Withdraw" && (
                   <button className="bg-green-500 hover:bg-green-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
