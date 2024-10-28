@@ -5,14 +5,16 @@ import Link from "next/link";
 interface Bill {
   id: number;
   amount: number;
+  paymentType: string;
   currency: string;
   dueDate: string;
   bonusRate: number;
-  address: string;
   status: string;
   uploader: {
     name: string;
   };
+  reservedUntil?: string;
+  paymentCode?: string;
 }
 
 const ReservedBills = () => {
