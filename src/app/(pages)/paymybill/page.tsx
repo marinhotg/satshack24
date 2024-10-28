@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import { createBill } from "./actions";
 import { getCurrencyList } from './components/currencyList';
 import { upload } from '@vercel/blob/client';
 
 export default function PayBillPage() {
+  const { user } = useAuth(); 
   const currencyOptions = getCurrencyList();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
@@ -18,25 +20,37 @@ export default function PayBillPage() {
     setIsSubmitting(true);
     setError("");
     setSuccess(false);
-
+  
+    if (!user?.id) {
+      setError("Please log in to create a bill");
+      setIsSubmitting(false);
+      return;
+    }
+  
     if (!billFile) {
       setError("Please attach a bill file before submitting.");
       setIsSubmitting(false);
       return;
     }
-
+  
     try {
       const newBlob = await upload(billFile.name, billFile, {
         access: 'public',
         handleUploadUrl: '/api/bills/upload-bill',
       });
-
-      // If you need the blob URL
-      // setBlobUrl(newBlob.url); 
-
-      formData.append("billFile", newBlob.url);
-
-      const result = await createBill(formData);
+  
+      const newFormData = new FormData();
+      
+      for (const [key, value] of formData.entries()) {
+        if (key !== 'billFile') { 
+          newFormData.append(key, value);
+        }
+      }
+  
+      newFormData.append("userId", user.id.toString());
+      newFormData.append("fileUrl", newBlob.url); 
+  
+      const result = await createBill(newFormData);
       
       if (result.error) {
         setError(result.error);
@@ -45,7 +59,7 @@ export default function PayBillPage() {
         const form = document.getElementById("billForm") as HTMLFormElement;
         form.reset();
         setSelectedCurrency(currencyOptions[0].code);
-        setBillFile(null); 
+        setBillFile(null);
       }
     } catch (e) {
       console.error("Something went wrong:", e);
@@ -91,122 +105,124 @@ export default function PayBillPage() {
 
         <h1 className="text-4xl font-serif font-bold text-gray-700 mb-6">Pay my bill</h1>
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-100 border-2 border-red-400 rounded-lg text-red-700">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-4 p-4 bg-green-100 border-2 border-green-400 rounded-lg text-green-700">
-            Bill created successfully!
-          </div>
-        )}
-
-        <form id="billForm" onSubmit={(e) => { e.preventDefault(); handleSubmit(new FormData(e.currentTarget)); }} className="space-y-6">
-          <div>
-            <label className="block mb-2 text-gray-700 font-mono font-bold">
-              Amount
-            </label>
-            <input
-              type="number"
-              name="amount"
-              step="0.01"
-              required
-              className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
-              placeholder="Amount"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 text-gray-700 font-mono font-bold">
-              Payment Type
-            </label>
-            <select
-              name="paymentType"
-              required
-              className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
-            >
-              <option value="BANK_TRANSFER">Bank Transfer</option>
-              <option value="CRYPTO">Cryptocurrency</option>
-              <option value="CARD">Credit/Debit Card</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-2 text-gray-700 font-mono font-bold">
-              Currency
-            </label>
-            <select
-              name="currency"
-              value={selectedCurrency}
-              onChange={handleCurrencyChange}
-              className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
-            >
-              {currencyOptions.map((currency) => (
-                <option key={currency.code} value={currency.code}>
-                  {`${currency.name} (${currency.code})`}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-2 text-gray-700 font-mono font-bold">
-              Due Date
-            </label>
-            <input
-              type="date"
-              name="dueDate"
-              required
-              className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 text-gray-700 font-mono font-bold">
-              Bonus Rate (%)
-            </label>
-            <input
-              type="number"
-              name="bonusRate"
-              step="0.1"
-              min="0"
-              className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
-              placeholder="Bonus Rate"
-            />
-          </div>
-
-          <div className="flex flex-col items-center space-y-2 mt-4">
-            <input
-              type="file"
-              name="billFile"
-              onChange={handleFileChange}
-              className="hidden"
-              id="upload-bill"
-              required
-            />
-            <label
-              htmlFor="upload-bill"
-              className="w-40 h-12 bg-[#FFD700] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold text-center py-2 px-4 rounded-lg border-2 border-black cursor-pointer flex items-center justify-center"
-            >
-              Upload Bill
-            </label>
-            {billFile && (
-              <span className="text-gray-700 font-mono">{billFile.name}</span>
+        {!user ? (
+          <Link href="/login">
+            <button className="w-full mb-4 p-4 bg-yellow-100 hover:bg-yellow-200 border-2 border-yellow-400 rounded-lg text-yellow-700 font-mono font-bold text-center cursor-pointer transition-colors">
+              Please log in to create a bill
+            </button>
+          </Link>
+        ) : (
+          <>
+            {error && (
+              <div className="mb-4 p-4 bg-red-100 border-2 border-red-400 rounded-lg text-red-700">
+                {error}
+              </div>
             )}
-          </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`w-full h-[8vh] bg-[#FADA5E] hover:bg-[#FFD700] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-gray ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-            } mt-4`}
-          >
-            {isSubmitting ? "Creating bill..." : `Submit (Using: ${selectedCurrency})`}
-          </button>
-        </form>
+            {success && (
+              <div className="mb-4 p-4 bg-green-100 border-2 border-green-400 rounded-lg text-green-700">
+                Bill created successfully!
+              </div>
+            )}
+
+            <form
+              id="billForm"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(new FormData(e.currentTarget));
+              }}
+              className="space-y-6"
+            >
+              <div>
+                <label className="block mb-2 text-gray-700 font-mono font-bold">
+                  Amount
+                </label>
+                <input
+                  type="number"
+                  name="amount"
+                  step="0.01"
+                  required
+                  className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
+                  placeholder="Amount"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-gray-700 font-mono font-bold">
+                  Currency
+                </label>
+                <select
+                  name="currency"
+                  value={selectedCurrency}
+                  onChange={handleCurrencyChange}
+                  className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
+                >
+                  {currencyOptions.map((currency) => (
+                    <option key={currency.code} value={currency.code}>
+                      {`${currency.name} (${currency.code})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-2 text-gray-700 font-mono font-bold">
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  name="dueDate"
+                  required
+                  className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-gray-700 font-mono font-bold">
+                  Bonus Rate (%)
+                </label>
+                <input
+                  type="number"
+                  name="bonusRate"
+                  step="0.1"
+                  min="0"
+                  className="w-full h-[8vh] border-2 border-black rounded-md py-2 px-4 text-gray-700"
+                  placeholder="Bonus Rate"
+                />
+              </div>
+
+              <div className="flex flex-col items-center space-y-2 mt-4">
+                <input
+                  type="file"
+                  name="billFile"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="upload-bill"
+                  required
+                />
+                <label
+                  htmlFor="upload-bill"
+                  className="w-40 h-12 bg-[#FFD700] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold text-center py-2 px-4 rounded-lg border-2 border-black cursor-pointer flex items-center justify-center"
+                >
+                  Upload Bill
+                </label>
+                {billFile && (
+                  <span className="text-gray-700 font-mono">{billFile.name}</span>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full h-[8vh] bg-[#FADA5E] hover:bg-[#FFD700] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-gray ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                } mt-4`}
+              >
+                {isSubmitting ? "Creating bill..." : `Submit (Using: ${selectedCurrency})`}
+              </button>
+            </form>
+          </>
+        )}
       </div>
 
       <div className="fixed bottom-4 left-4">
