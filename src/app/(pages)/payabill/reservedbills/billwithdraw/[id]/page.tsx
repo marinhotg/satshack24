@@ -1,7 +1,9 @@
-"use client"; 
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import StarRating from '@/src/app/(pages)/paymybill/components/StarRating'; // Importa o componente de classificação
+
 
 interface Bill {
   id: number;
@@ -15,14 +17,13 @@ interface Bill {
     name: string;
   };
   reservedUntil?: string;
-  paymentCode?: string;
 }
 
-const BillDetailsPage = () => {
+const BillWithdrawPage = () => {
   const [bill, setBill] = useState<Bill | null>(null);
-  const [receipt, setReceipt] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rating, setRating] = useState<number>(0); // Estado para o rating
 
   const getIdFromUrl = () => {
     const pathParts = window.location.pathname.split('/');
@@ -50,19 +51,10 @@ const BillDetailsPage = () => {
     fetchBillDetails();
   }, []);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setReceipt(file);
-    }
-  };
 
-  const handleUpload = () => {
-    if (receipt) {
-      console.log('Receipt uploaded:', receipt);
-    } else {
-      alert('Please attach a receipt.');
-    }
+
+  const handleRatingChange = (newRating: number) => {
+    setRating(newRating);
   };
 
   if (isLoading) {
@@ -110,56 +102,35 @@ const BillDetailsPage = () => {
     );
   }
 
+  const finalValue = bill.amount * (1 + bill.bonusRate / 100);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-teal-500">
-      <h1 className="text-4xl font-serif font-bold text-white mb-4">Bill Details</h1>
+      <h1 className="text-4xl font-serif font-bold text-white mb-4">Bill Withdraw</h1>
       
-      <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-96">
+      <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-96 flex flex-col items-center">
         <h2 className="text-2xl font-bold text-teal-900 mb-2">Bill ID: {bill.id}</h2>
         <p className="text-lg text-teal-800">Value: {bill.amount.toFixed(2)} {bill.currency}</p>
         <p className="text-lg text-teal-800">Payment Type: {bill.paymentType}</p>
-        <p className="text-lg text-teal-800">Due Date: {new Date(bill.dueDate).toLocaleDateString()}</p>
         <p className="text-lg text-teal-800">Bonus Rate: {bill.bonusRate.toFixed(2)}%</p>
-        <p className="text-lg text-teal-800">Status: {bill.status}</p>
-        <p className="text-lg text-teal-800">Uploader: {bill.uploader.name}</p>
-        {bill.paymentCode && (
-          <p className="text-lg text-teal-800">Payment Code: {bill.paymentCode}</p>
-        )}
-        {bill.reservedUntil && (
-          <p className="text-lg text-teal-800">
-            Reserved Until: {new Date(bill.reservedUntil).toLocaleString()}
-          </p>
-        )}
+        <p className="text-lg text-teal-800">Final Value with Bonus: {finalValue.toFixed(2)} {bill.currency}</p>
 
-        <div className="flex flex-col items-center space-y-2 mt-4">
-          <input
-            type="file"
-            name="file"
-            onChange={handleFileChange}
-            className="hidden"
-            id="file-upload"
-          />
-          <label
-            htmlFor="file-upload"
-            className="w-40 h-12 bg-[#FFD700] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold text-center py-2 px-4 rounded-lg border-2 border-black cursor-pointer flex items-center justify-center"
-          >
-            Input receipt
-          </label>
-          {receipt && (
-            <span className="text-gray-700 font-mono">{receipt.name}</span>
-          )}
+
+        {/* Rating e estrelas centralizadas */}
+        <div className="flex flex-col items-center mt-10">
+          <p className="text-2xl font-bold text-teal-900 mb-2">Rate the Service:</p>
+          <StarRating rating={rating} onRatingChange={handleRatingChange} />
+          <p className="text-lg text-teal-800">Rating: {rating} star{rating !== 1 ? 's' : ''}</p>
         </div>
 
-        <button
-          onClick={handleUpload}
-          className="w-full bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-4"
-        >
-          Send receipt
+        {/* Botão de Withdraw */}
+        <button className="w-full bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-6">
+          Withdraw
         </button>
       </div>
 
       <div className="fixed bottom-4 left-4">
-        <Link href="/payabill/reservedbills">
+        <Link href="/withdraw">
           <button className="bg-[#FFFAA0] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold py-2 px-4 rounded-lg border-2 border-black">
             Go Back
           </button>
@@ -169,4 +140,4 @@ const BillDetailsPage = () => {
   );
 };
 
-export default BillDetailsPage;
+export default BillWithdrawPage;
