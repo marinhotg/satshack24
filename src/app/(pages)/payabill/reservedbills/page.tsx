@@ -40,9 +40,9 @@ const ReservedBills = () => {
         setIsLoading(false);
       }
     };
-
+  
     fetchReservedBills();
-  });
+  }, []); 
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
