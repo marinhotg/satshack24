@@ -24,7 +24,67 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #14B8A6 ;
+  background-color: #14B8A6; /* Cor de fundo sólida */
+  background-image: 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'), 
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'),
+    url('./image/bitcoin.png'); /* Adicione mais imagens conforme necessário */
+  
+  background-size: 220px 193px; 
+  background-position: 
+    -12% 40%,  /* Imagem 2 */
+    -12% 120%,  /* Imagem 4 */
+    0% 1%,   /* Imagem 1 */
+    8% 40%,  /* Imagem 2 */
+    0% 80%,  /* Imagem 3 */
+    8% 120%,  /* Imagem 4 */
+    20% 1%,   /* Imagem 1 */
+    28% 40%,  /* Imagem 2 */
+    20% 80%,  /* Imagem 3 */
+    28% 120%,  /* Imagem 4 */
+    40% 1%,   /* Imagem 1 */
+    48% 40%,
+    40% 80%,  /* Imagem 3 */
+    48% 120%,
+    60% 1%,   /* Imagem 1 */
+    68% 40%,
+    60% 80%,  /* Imagem 3 */
+    68% 120%, 
+    80% 1%,   /* Imagem 1 */
+    88% 40%,
+    80% 80%,  /* Imagem 3 */
+    88% 120%,  /* Imagem 2 */
+    100% 1%,   /* Imagem 1 */
+    108% 40%,
+    100% 80%,  /* Imagem 3 */
+    108% 120%;  /* Imagem 2 */
+    
+     
+  
+  background-repeat: no-repeat; /* Não repete as imagens */
   margin: 0;
   padding: 0;
   display: flex;

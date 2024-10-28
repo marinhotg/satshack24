@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-screen bg-teal-500 p-4 text-center">
+    <div className="flex flex-col items-center justify-center h-screen w-screen p-4 text-center"> {/* Removido bg-teal-500 */}
       <h1 className="text-5xl font-serif font-bold text-white my-8">Welcome to Private Bills</h1>
 
       <section className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-full max-w-4xl mb-8">
