@@ -171,4 +171,17 @@ export class UserService {
       where: { id: userId },
     });
   }
+
+  async getNodeIdByUserId(userId: number): Promise<string | null> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { nodeId: true },
+    });
+
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    return user.nodeId;
+  }
 }
