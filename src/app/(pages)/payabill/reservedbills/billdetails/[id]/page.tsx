@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface Bill {
   id: number;
@@ -21,11 +20,8 @@ interface Bill {
 const BillDetailsPage = () => {
   const [bill, setBill] = useState<Bill | null>(null);
   const [receipt, setReceipt] = useState<File | null>(null);
-  const [qrCodeURL, setQrCodeURL] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [amount, setAmount] = useState(0);
-  const [memo, setMemo] = useState("");
 
   const getIdFromUrl = () => {
     const pathParts = window.location.pathname.split('/');
@@ -65,32 +61,6 @@ const BillDetailsPage = () => {
       console.log('Receipt uploaded:', receipt);
     } else {
       alert('Please attach a receipt.');
-    }
-  };
-
-  const handleCreateInvoice = async () => {
-    try {
-      setError(null);
-      const response = await fetch("/api/bills/light", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: bill?.uploader.name, amount, memo }), // Supondo que o userId seja o uploader.name, ajuste conforme necessário
-      });
-
-      const text = await response.text();
-      console.log("Resposta da API:", text);
-
-      if (!response.ok) {
-        throw new Error("Erro ao criar o invoice: " + text);
-      }
-
-      const data = JSON.parse(text);
-      setQrCodeURL(data.qrCode);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro desconhecido");
-      console.error("Erro:", err);
     }
   };
 
@@ -184,46 +154,6 @@ const BillDetailsPage = () => {
         >
           Send receipt
         </button>
-        
-        {/* Campos para gerar invoice */}
-        <div className="mt-4">
-          <h3 className="text-lg font-bold">Gerar Invoice</h3>
-          <label>
-            Valor em Milli-satoshis:
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              placeholder="Ex: 100000"
-              className="border p-2 rounded"
-            />
-          </label>
-          <label>
-            Memo:
-            <input
-              type="text"
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              placeholder="Descrição do invoice"
-              className="border p-2 rounded"
-            />
-          </label>
-          <button onClick={handleCreateInvoice} className="bg-blue-300 text-white font-bold px-4 py-2 rounded mt-2">
-            Criar Invoice e Gerar QR Code
-          </button>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          {qrCodeURL && (
-            <div>
-              <h2>QR Code do Invoice</h2>
-              <Image
-                src={qrCodeURL}
-                alt="QR Code para pagamento do invoice"
-                width={200}
-                height={200}
-              />
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="fixed bottom-4 left-4">
