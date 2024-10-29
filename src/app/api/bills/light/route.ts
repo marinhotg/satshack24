@@ -9,6 +9,13 @@ export async function POST(req: NextRequest) {
   try {
     const { billId, amount, memo } = await req.json();
 
+    if (!billId) {
+      return NextResponse.json(
+        { error: "billId é obrigatório." },
+        { status: 400 }
+      );
+    }
+
     // 1. Busca o ID do usuário (reservedBy) que reservou a conta usando o billId
     const bill = await billService.getBill(billId);
     if (!bill || !bill.reservedBy) {

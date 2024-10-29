@@ -106,9 +106,9 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id,
+          billId: id,
           amount: bill.amount * (1 + bill.bonusRate / 100),
-          memo,
+          memo: memo,
         }), // Envia apenas o id para a rota
       });
 
