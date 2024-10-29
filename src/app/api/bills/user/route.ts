@@ -13,9 +13,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    console.log('Fetching bills for userId:', userId);
     const bills = await billService.listUserBills(Number(userId));
-    console.log('Found bills:', bills);
     
     return NextResponse.json(bills);
   } catch (error) {
