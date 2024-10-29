@@ -85,7 +85,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
   };
 
   const handleCreateInvoice = async () => {
-    if (!bill) return; // Ensure bill is loaded
+    if (!bill) return; 
     setIsLoadingInvoice(true);
     try {
       const response = await fetch("/api/bills/light", {
@@ -93,7 +93,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: bill.uploader.name, amount: bill.amount * (1 + bill.bonusRate / 100), memo }), 
+        body: JSON.stringify({amount: bill.amount * (1 + bill.bonusRate / 100), memo }), 
       });
 
       const text = await response.text();
@@ -108,9 +108,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
       console.error("Erro:", err);
-    } finally {
-      setIsLoadingInvoice(false);
-    }
+    } 
   };
 
   const calculatedAmount = bill ? bill.amount * (1 + bill.bonusRate / 100) : 0;
@@ -164,7 +162,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
       <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
         <h3 className="text-lg font-bold">Make Invoice</h3>
         <label>
-          Amount in Mili-Satoshis:
+          Amount in Milli-Satoshis:
           <input
             type="number"
             value={calculatedAmount / btcValue * 1000000} 
