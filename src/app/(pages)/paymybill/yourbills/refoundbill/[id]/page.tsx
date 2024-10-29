@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import QRCodeDisplay from "./QrCodeDisplay";
 
 interface RefoundBillProps {
   params: Promise<{ id: string }>;
@@ -212,8 +213,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         </button>
         {qrCodeURL && (
           <div className="mt-4">
-            <h3 className="text-lg font-bold">QR Code:</h3>
-            <img src={qrCodeURL} alt="QR Code" width={200} height={200} />
+            {qrCodeURL && <QRCodeDisplay dataUrl={qrCodeURL} />}
           </div>
         )}
       </div>
