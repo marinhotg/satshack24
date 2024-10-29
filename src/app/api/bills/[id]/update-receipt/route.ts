@@ -3,8 +3,8 @@ import prisma from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
-    // Obtém o 'id' diretamente da URL
-    const id = request.nextUrl.pathname.split("/").pop();
+    const urlSegments = request.nextUrl.pathname.split("/");
+    const id = urlSegments[urlSegments.length - 2];
     if (!id) {
       return NextResponse.json(
         { error: "Bill ID is missing" },

@@ -165,12 +165,24 @@ const BillDetailsPage = () => {
       <h1 className="text-4xl font-serif font-bold text-white mb-4">Bill Details</h1>
       
       <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-96">
-        <h2 className="text-2xl font-bold text-teal-900 mb-2">Bill ID: {bill.id}</h2>
-        <p className="text-lg text-teal-800">Value: {bill.amount.toFixed(2)} {bill.currency}</p>
-        <p className="text-lg text-teal-800">Due Date: {new Date(bill.dueDate).toLocaleDateString()}</p>
-        <p className="text-lg text-teal-800">Bonus Rate: {bill.bonusRate.toFixed(2)}%</p>
-        <p className="text-lg text-teal-800">Status: {bill.status}</p>
-        <p className="text-lg text-teal-800">Uploader: {bill.uploader.name}</p>
+      <h2 className="text-2xl font-bold text-teal-900 mb-2">
+        Bill ID: {bill?.id || 'N/A'}
+      </h2>
+      <p className="text-lg text-teal-800">
+        Value: {typeof bill?.amount === 'number' ? bill.amount.toFixed(2) : '0.00'} {bill?.currency || 'USD'}
+      </p>
+      <p className="text-lg text-teal-800">
+        Due Date: {bill?.dueDate ? new Date(bill.dueDate).toLocaleDateString() : 'Not set'}
+      </p>
+      <p className="text-lg text-teal-800">
+        Bonus Rate: {typeof bill?.bonusRate === 'number' ? bill.bonusRate.toFixed(2) : '0.00'}%
+      </p>
+      <p className="text-lg text-teal-800">
+        Status: {bill?.status || 'Unknown'}
+      </p>
+      <p className="text-lg text-teal-800">
+        Uploader: {bill?.uploader?.name || 'Unknown'}
+      </p>
         {bill.paymentCode && (
           <p className="text-lg text-teal-800">Payment Code: {bill.paymentCode}</p>
         )}

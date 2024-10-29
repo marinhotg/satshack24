@@ -15,7 +15,7 @@ interface Bill {
   bonusRate: number;
   status: string;
   receiptUrl?: string;
-  receiptPathname?: string;
+  receiptPathname?: string; 
   receiptUploadedAt?: string;
   uploader: {
     name: string;
@@ -30,15 +30,17 @@ const ApproveBill: React.FC<ApproveBillProps> = ({ params }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   useEffect(() => {
-    params.then((resolvedParams) => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
       setId(resolvedParams.id);
-    });
+    };
+    resolveParams();
   }, [params]);
 
   useEffect(() => {
-    const fetchBillDetails = async () => {
-      if (!id) return;
+    if (!id) return;
 
+    const fetchBillDetails = async () => {
       try {
         const response = await fetch(`/api/bills/${id}`);
         if (!response.ok) throw new Error('Failed to fetch bill details');
@@ -61,18 +63,23 @@ const ApproveBill: React.FC<ApproveBillProps> = ({ params }) => {
     
     setIsApproving(true);
     setError(null);
-
+  
     try {
+      const formData = new FormData();
+      const file = new File([""], "receipt.jpg", { type: "image/jpeg" });
+
+      formData.append("file", file);
+  
       const response = await fetch(`/api/bills/${id}/approve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
-
+  
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Failed to approve bill');
       }
-
+  
       const updatedBill = await response.json();
       setBill(updatedBill);
       alert('Bill approved successfully!');
@@ -84,7 +91,6 @@ const ApproveBill: React.FC<ApproveBillProps> = ({ params }) => {
     }
   };
 
-  // Componente Modal para visualização da imagem
   const ImageModal = () => {
     if (!isImageModalOpen || !bill?.receiptUrl) return null;
   
