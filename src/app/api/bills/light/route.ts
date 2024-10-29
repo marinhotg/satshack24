@@ -16,6 +16,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const billIdInt = parseInt(billId, 10);
+    if (isNaN(billIdInt)) {
+      return NextResponse.json({ error: "ID inválido." }, { status: 400 });
+    }
+
     // 1. Busca o ID do usuário (reservedBy) que reservou a conta usando o billId
     const bill = await billService.getBill(billId);
     if (!bill || !bill.reservedBy) {
