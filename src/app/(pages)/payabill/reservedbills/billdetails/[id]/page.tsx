@@ -1,7 +1,8 @@
-"use client"; 
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { upload } from '@vercel/blob/client';
 
 interface Bill {
   id: number;
@@ -22,6 +23,8 @@ const BillDetailsPage = () => {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const getIdFromUrl = () => {
     const pathParts = window.location.pathname.split('/');
@@ -53,14 +56,62 @@ const BillDetailsPage = () => {
     const file = event.target.files?.[0];
     if (file) {
       setReceipt(file);
+      setError(null); // Limpa erros anteriores
     }
   };
 
-  const handleUpload = () => {
-    if (receipt) {
-      console.log('Receipt uploaded:', receipt);
-    } else {
-      alert('Please attach a receipt.');
+  const handleUpload = async () => {
+    if (!receipt) {
+      setError('Please attach a receipt.');
+      return;
+    }
+
+    if (!bill?.id) {
+      setError('Bill information not found.');
+      return;
+    }
+
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      // Upload do arquivo para o blob storage
+      const receiptBlob = await upload(receipt.name, receipt, {
+        access: 'public',
+        handleUploadUrl: '/api/bills/upload-receipt',
+      });
+
+      // Atualizar o bill com a URL do receipt
+      const response = await fetch(`/api/bills/${bill.id}/update-receipt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          receiptUrl: receiptBlob.url,
+          receiptPathname: receipt.name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update bill with receipt');
+      }
+
+      // Atualizar o estado local
+      const updatedBill = await response.json();
+      setBill(updatedBill);
+      setUploadSuccess(true);
+      setReceipt(null);
+
+      // Limpar o input file
+      const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+    } catch (err) {
+      console.error('Upload failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to upload receipt');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -114,12 +165,24 @@ const BillDetailsPage = () => {
       <h1 className="text-4xl font-serif font-bold text-white mb-4">Bill Details</h1>
       
       <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 shadow-md w-96">
-        <h2 className="text-2xl font-bold text-teal-900 mb-2">Bill ID: {bill.id}</h2>
-        <p className="text-lg text-teal-800">Value: {bill.amount.toFixed(2)} {bill.currency}</p>
-        <p className="text-lg text-teal-800">Due Date: {new Date(bill.dueDate).toLocaleDateString()}</p>
-        <p className="text-lg text-teal-800">Bonus Rate: {bill.bonusRate.toFixed(2)}%</p>
-        <p className="text-lg text-teal-800">Status: {bill.status}</p>
-        <p className="text-lg text-teal-800">Uploader: {bill.uploader.name}</p>
+      <h2 className="text-2xl font-bold text-teal-900 mb-2">
+        Bill ID: {bill?.id || 'N/A'}
+      </h2>
+      <p className="text-lg text-teal-800">
+        Value: {typeof bill?.amount === 'number' ? bill.amount.toFixed(2) : '0.00'} {bill?.currency || 'USD'}
+      </p>
+      <p className="text-lg text-teal-800">
+        Due Date: {bill?.dueDate ? new Date(bill.dueDate).toLocaleDateString() : 'Not set'}
+      </p>
+      <p className="text-lg text-teal-800">
+        Bonus Rate: {typeof bill?.bonusRate === 'number' ? bill.bonusRate.toFixed(2) : '0.00'}%
+      </p>
+      <p className="text-lg text-teal-800">
+        Status: {bill?.status || 'Unknown'}
+      </p>
+      <p className="text-lg text-teal-800">
+        Uploader: {bill?.uploader?.name || 'Unknown'}
+      </p>
         {bill.paymentCode && (
           <p className="text-lg text-teal-800">Payment Code: {bill.paymentCode}</p>
         )}
@@ -129,31 +192,51 @@ const BillDetailsPage = () => {
           </p>
         )}
 
-        <div className="flex flex-col items-center space-y-2 mt-4">
-          <input
-            type="file"
-            name="file"
-            onChange={handleFileChange}
-            className="hidden"
-            id="file-upload"
-          />
-          <label
-            htmlFor="file-upload"
-            className="w-40 h-12 bg-[#FFD700] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold text-center py-2 px-4 rounded-lg border-2 border-black cursor-pointer flex items-center justify-center"
-          >
-            Input receipt
-          </label>
-          {receipt && (
-            <span className="text-gray-700 font-mono">{receipt.name}</span>
-          )}
-        </div>
+        {uploadSuccess ? (
+          <div className="mt-4 p-4 bg-green-100 border-2 border-green-400 rounded-lg text-green-700">
+            Receipt uploaded successfully! Status changed to Processing.
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col items-center space-y-2 mt-4">
+              <input
+                type="file"
+                name="file"
+                onChange={handleFileChange}
+                className="hidden"
+                id="file-upload"
+                accept=".pdf,.jpg,.jpeg,.png"
+              />
+              <label
+                htmlFor="file-upload"
+                className="w-40 h-12 bg-[#FFD700] hover:bg-[#FADA5E] text-gray-700 font-mono font-bold text-center py-2 px-4 rounded-lg border-2 border-black cursor-pointer flex items-center justify-center"
+              >
+                Input receipt
+              </label>
+              {receipt && (
+                <span className="text-gray-700 font-mono">{receipt.name}</span>
+              )}
+            </div>
 
-        <button
-          onClick={handleUpload}
-          className="w-full bg-green-300 text-teal-900 font-bold px-4 py-2 rounded-lg hover:bg-green-400 mt-4"
-        >
-          Send receipt
-        </button>
+            {error && (
+              <div className="mt-2 p-2 bg-red-100 border border-red-400 rounded text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={handleUpload}
+              disabled={isUploading || !receipt}
+              className={`w-full ${
+                isUploading || !receipt 
+                  ? 'bg-gray-300 cursor-not-allowed' 
+                  : 'bg-green-300 hover:bg-green-400'
+              } text-teal-900 font-bold px-4 py-2 rounded-lg mt-4 transition-colors`}
+            >
+              {isUploading ? 'Uploading...' : 'Send receipt'}
+            </button>
+          </>
+        )}
       </div>
 
       <div className="fixed bottom-4 left-4">

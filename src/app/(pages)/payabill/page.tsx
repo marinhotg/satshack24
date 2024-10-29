@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getCurrencyList } from '../paymybill/components/currencyList';
 
 interface Bill {
@@ -52,6 +53,7 @@ const BillCard = ({
 };
 
 const BillSelectionPage = () => {
+  const router = useRouter();
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [minValue, setMinValue] = useState('');
@@ -106,7 +108,9 @@ const BillSelectionPage = () => {
         throw new Error('Failed to reserve bill');
       }
 
-      <Link href={`/payabill/reservedbills`}></Link>;
+      setSelectedBill(null); // Close the modal
+      router.push('/payabill/reservedbills');
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reserve bill');
       setSelectedBill(null);

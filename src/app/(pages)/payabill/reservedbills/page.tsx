@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from 'next/image';
 
 interface Bill {
   id: number;
@@ -15,6 +16,9 @@ interface Bill {
   };
   reservedUntil?: string;
   paymentCode?: string;
+  fileUrl?: string;
+  filePathname?: string;
+  fileUploadedAt?: string;
 }
 
 const ReservedBills = () => {
@@ -22,8 +26,7 @@ const ReservedBills = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
-  //const [userId, setUserId] = useState<number>(1);
-
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchReservedBills = async () => {
@@ -165,13 +168,23 @@ const ReservedBills = () => {
                 {new Date(bill.dueDate).toLocaleDateString()}
               </div>
 
-              <div className="flex justify-around mt-4">
+              <div className="flex flex-col gap-2 mt-4">
                 {bill.status === "RESERVED" && (
-                  <Link href={`reservedbills/billdetails/${bill.id}`}>
-                    <button className="bg-red-500 hover:bg-red-600 text-white font-mono font-bold py-2 px-20 rounded-lg border-2 border-black">
-                      Pay
+                  <>
+                    {bill.fileUrl && (
+                      <button
+                      onClick={() => setSelectedFile(bill.fileUrl ?? null)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black mb-2"
+                    >
+                      View Bill File
                     </button>
-                  </Link>
+                    )}
+                    <Link href={`reservedbills/billdetails/${bill.id}`}>
+                      <button className="bg-red-500 hover:bg-red-600 text-white font-mono font-bold py-2 px-20 rounded-lg border-2 border-black">
+                        Pay
+                      </button>
+                    </Link>
+                  </>
                 )}
                 {bill.status === "PROCESSING" && (
                   <button
@@ -187,8 +200,6 @@ const ReservedBills = () => {
                     disabled>
                     Wait for payment
                   </button>
-
-
                 )}
                 {bill.status === "COMPLETED" && (
                   <Link href={`reservedbills/billrate/${bill.id}`}>
@@ -200,6 +211,39 @@ const ReservedBills = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {selectedFile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Bill File Preview</h3>
+              <button
+                onClick={() => setSelectedFile(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            {selectedFile.endsWith('.pdf') ? (
+              <iframe
+                src={selectedFile}
+                className="w-full h-[70vh]"
+                title="Bill File PDF"
+              />
+            ) : (
+              <div className="relative w-full h-[70vh]">
+                <Image
+                  src={selectedFile}
+                  alt="Bill File"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
