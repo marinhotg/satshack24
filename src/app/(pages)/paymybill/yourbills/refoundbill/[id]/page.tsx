@@ -26,6 +26,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
   const [isLoadingInvoice, setIsLoadingInvoice] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [memo, setMemo] = useState("");
+  const [invoiceCode, setInvoiceCode] = useState<string | null>(null);
   const [qrCodeURL, setQrCodeURL] = useState<string | null>(null);
   const [btcValue, setBtcValue] = useState<number>(0);
 
@@ -121,6 +122,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
       }
 
       const data = JSON.parse(text);
+      setInvoiceCode(data.invoiceCode);
       setQrCodeURL(data.qrCode);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -182,6 +184,10 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         ) : (
           <p>Loading bill details...</p>
         )}
+      </div>
+      <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
+        <h2 className="text-lg font-bold">Invoice Code</h2>
+        <p>{invoiceCode}</p>
       </div>
 
       <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
