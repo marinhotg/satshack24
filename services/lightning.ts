@@ -1,6 +1,7 @@
 import {
   AccountTokenAuthProvider,
   LightsparkClient,
+  TransactionStatus,
 } from "@lightsparkdev/lightspark-sdk";
 
 import QRCode from "qrcode";
@@ -8,6 +9,7 @@ import QRCode from "qrcode";
 class LightningService {
   private client: LightsparkClient;
   private nodeId: string;
+  private subscription: any;
 
   constructor() {
     const requireEnv = (name: string): string => {
@@ -37,52 +39,14 @@ class LightningService {
     }
   }
 
-  /**
-   * Creates a Lightning invoice for the configured node
-   */
-  async createInvoice(amountMsats: number, memo: string): Promise<string> {
-    try {
-      console.log("Creating invoice with node ID:", this.nodeId);
-      
-      const invoice = await this.client.createInvoice(
-        this.nodeId,
-        amountMsats,
-        memo
-      );
-
-      if (!invoice) {
-        throw new Error("Invoice creation returned null or undefined");
-      }
-
-      return invoice;
-    } catch (error) {
-      console.error("Failed to create invoice:", error);
-      
-      // Check if it's a Lightspark error by looking at the error properties and message
-      if (error instanceof Error && 
-          (error.message.includes('LightsparkException') || 
-           error.message.includes('Request CreateInvoice failed'))) {
-        throw new Error(`Lightning error: ${error.message}`);
-      }
-      
-      throw new Error("Failed to create Lightning invoice: " + (error instanceof Error ? error.message : String(error)));
-    }
-  }
-
-  /**
-   * Creates a Lightning invoice
-   * Note: This always uses the configured node ID, not a user-provided one
-   */
   async createUserInvoice(
+    nodeId: string,
     amountMsats: number,
-    memo: string,
+    memo: string
   ): Promise<string> {
     try {
-      // Always use the configured node ID
-      console.log("Creating user invoice with configured node ID:", this.nodeId);
-      
       const invoice = await this.client.createInvoice(
-        this.nodeId,
+        nodeId,
         amountMsats,
         memo
       );
@@ -94,32 +58,56 @@ class LightningService {
       return invoice;
     } catch (error) {
       console.error("Failed to create user invoice:", error);
-      
-      // Check if it's a Lightspark error by looking at the error message
-      if (error instanceof Error && 
-          (error.message.includes('LightsparkException') || 
-           error.message.includes('Request CreateInvoice failed'))) {
-        // Extract useful information from the error message
-        const errorMessage = error.message
-          .replace('LightsparkException [Error]: Request CreateInvoice failed. ', '')
-          .replace('[{"message":"', '')
-          .replace('"}]', '');
-        throw new Error(`Lightning error: ${errorMessage}`);
-      }
-      
-      throw new Error("Failed to create Lightning invoice: " + (error instanceof Error ? error.message : String(error)));
+      throw new Error(
+        "Failed to create Lightning invoice: " +
+          (error instanceof Error ? error.message : String(error))
+      );
     }
   }
 
-  /**
-   * Gets the configured node ID
-   */
+  startListeningForTransaction(nodeId: string) {
+    if (this.subscription) {
+      console.log("Already listening for transactions.");
+      return;
+    }
+
+    console.log("Starting to listen for transactions...");
+
+    this.subscription = this.client.listenToTransactions([nodeId]).subscribe({
+      next: (transaction) => {
+        if (transaction) {
+          console.log(`Transaction updated! ${JSON.stringify(transaction)}`);
+          if (transaction.status === TransactionStatus.SUCCESS) {
+            console.log("Transaction confirmed!");
+            this.stopListening();
+          } else if (transaction.status === TransactionStatus.CANCELLED) {
+            console.log("Transaction cancelled.");
+            this.stopListening();
+          } else if (transaction.status === TransactionStatus.PENDING) {
+            console.log("Transaction pending.");
+          }
+        }
+      },
+      error: (error) => {
+        console.error("Error listening for transactions:", error);
+      },
+    });
+  }
+
+  stopListening() {
+    if (this.subscription) {
+      console.log("Stopping listening for transactions...");
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
+  }
+
   getNodeId(): string {
     return this.nodeId;
   }
 }
 
-// Create singleton instance
+// Singleton instance
 const lightningService = new LightningService();
 
 export default lightningService;
