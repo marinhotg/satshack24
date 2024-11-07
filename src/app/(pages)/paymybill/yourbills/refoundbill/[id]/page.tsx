@@ -212,8 +212,8 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
           {isLoadingInvoice ? "Creating Invoice..." : "Create Invoice"}
         </button>
         {qrCodeURL && (
-          <div className="mt-4">
-            {qrCodeURL && <QRCodeDisplay dataUrl={qrCodeURL} />}
+          <div className="mt-4 flex justify-center">
+            <QRCodeDisplay dataUrl={qrCodeURL} />
           </div>
         )}
       </div>
