@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Bill {
   id: number;
@@ -27,11 +28,18 @@ const ReservedBills = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchReservedBills = async () => {
+      if (!user) {
+        setError("Please log in to view your reserved bills");
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch(`/api/bills/paid`);
+        const response = await fetch(`/api/bills/paid?userId=${user.id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch bills");
         }
@@ -45,7 +53,7 @@ const ReservedBills = () => {
     };
 
     fetchReservedBills();
-  }, []);
+  }, [user]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -80,6 +88,22 @@ const ReservedBills = () => {
             <h2 className="text-2xl font-mono font-bold text-gray-700">
               Loading your reserved bills...
             </h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen w-full bg-teal-500 flex flex-col items-center justify-center">
+        <div className="bg-[#FFFAA0] rounded-lg border-2 border-black p-8 shadow-lg">
+          <div className="flex flex-col items-center gap-4">
+            <Link href="/login">
+              <button className="w-full p-4 bg-yellow-100 hover:bg-yellow-200 border-2 border-yellow-400 rounded-lg text-yellow-700 font-mono font-bold text-center cursor-pointer transition-colors">
+                Please log in to view your reserved bills
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -173,11 +197,11 @@ const ReservedBills = () => {
                   <>
                     {bill.fileUrl && (
                       <button
-                      onClick={() => setSelectedFile(bill.fileUrl ?? null)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black mb-2"
-                    >
-                      View Bill File
-                    </button>
+                        onClick={() => setSelectedFile(bill.fileUrl ?? null)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-mono font-bold py-2 px-4 rounded-lg border-2 border-black mb-2"
+                      >
+                        View Bill File
+                      </button>
                     )}
                     <Link href={`reservedbills/billdetails/${bill.id}`}>
                       <button className="bg-red-500 hover:bg-red-600 text-white font-mono font-bold py-2 px-20 rounded-lg border-2 border-black">
@@ -197,7 +221,8 @@ const ReservedBills = () => {
                 {bill.status === "APPROVED" && (
                   <button
                     className="bg-blue-400 text-black font-mono font-bold py-2 px-4 rounded-lg border-2 border-black cursor-not-allowed"
-                    disabled>
+                    disabled
+                  >
                     Wait for payment
                   </button>
                 )}
