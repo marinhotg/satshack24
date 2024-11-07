@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import lightningService from "@/services/lightning";
+import {
+  lightningServiceNode1,
+  lightningServiceNode2,
+} from "@/services/lightning";
 import { UserService } from "@/services/user";
 import { billService } from "@/services/bill";
 
 const userService = new UserService();
+
+const NODE_ID_1 = process.env.LIGHTSPARK_NODE_ID!;
+const NODE_ID_2 = process.env.LIGHTSPARK_NODE_ID2!;
+
+// Função para escolher a instância com base no nodeId
+function getLightningServiceByNodeId(nodeId: string) {
+  if (nodeId === NODE_ID_1) {
+    return lightningServiceNode1;
+  } else if (nodeId === NODE_ID_2) {
+    return lightningServiceNode2;
+  } else {
+    throw new Error("NodeId não corresponde a nenhuma instância configurada.");
+  }
+}
 
 /**
  * Validates and converts the input amount to BTC
@@ -130,6 +147,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const lightningService = getLightningServiceByNodeId(nodeId);
+
     const invoice = await lightningService.createUserInvoice(
       nodeId,
       validation.msats!,
@@ -179,4 +198,17 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function GET(req: NextRequest) {
+  const transactionStatus = lightningServiceNode2.getTransactionStatus();
+
+  if (!transactionStatus) {
+    return NextResponse.json(
+      { error: "Nenhuma transação em andamento" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({ status: transactionStatus });
 }

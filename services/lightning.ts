@@ -3,27 +3,16 @@ import {
   LightsparkClient,
   TransactionStatus,
 } from "@lightsparkdev/lightspark-sdk";
-
 import QRCode from "qrcode";
 
 class LightningService {
   private client: LightsparkClient;
   private nodeId: string;
   private subscription: any;
+  private transactionStatus: TransactionStatus | null = null;
 
-  constructor() {
-    const requireEnv = (name: string): string => {
-      const value = process.env[name];
-      if (value === undefined) {
-        throw new Error(`Environment variable ${name} is not set.`);
-      }
-      return value;
-    };
-
-    const tokenId = requireEnv("LIGHTSPARK_API_TOKEN_CLIENT_ID");
-    const tokenSecret = requireEnv("LIGHTSPARK_API_TOKEN_CLIENT_SECRET");
-    this.nodeId = requireEnv("LIGHTSPARK_NODE_ID");
-
+  constructor(tokenId: string, tokenSecret: string, nodeId: string) {
+    this.nodeId = nodeId;
     this.client = new LightsparkClient(
       new AccountTokenAuthProvider(tokenId, tokenSecret)
     );
@@ -105,9 +94,23 @@ class LightningService {
   getNodeId(): string {
     return this.nodeId;
   }
+
+  getTransactionStatus(): TransactionStatus | null {
+    return this.transactionStatus;
+  }
 }
 
-// Singleton instance
-const lightningService = new LightningService();
+// Inicializa duas instâncias do LightningService para os dois nós
+const lightningServiceNode1 = new LightningService(
+  process.env.LIGHTSPARK_API_TOKEN_CLIENT_ID!,
+  process.env.LIGHTSPARK_API_TOKEN_CLIENT_SECRET!,
+  process.env.LIGHTSPARK_NODE_ID!
+);
 
-export default lightningService;
+const lightningServiceNode2 = new LightningService(
+  process.env.LIGHTSPARK_API_TOKEN_CLIENT_ID2!,
+  process.env.LIGHTSPARK_API_TOKEN_CLIENT_SECRET2!,
+  process.env.LIGHTSPARK_NODE_ID2!
+);
+
+export { lightningServiceNode1, lightningServiceNode2 };
