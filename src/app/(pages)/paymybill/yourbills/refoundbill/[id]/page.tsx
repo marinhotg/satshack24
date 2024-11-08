@@ -29,6 +29,9 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
   const [invoiceCode, setInvoiceCode] = useState<string | null>(null);
   const [qrCodeURL, setQrCodeURL] = useState<string | null>(null);
   const [btcValue, setBtcValue] = useState<number>(0);
+  const [transactionStatus, setTransactionStatus] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -68,6 +71,32 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
     fetchBillDetails();
     fetchBtcValue();
   }, [id]);
+
+  // Função para verificar o status da transação periodicamente
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      if (!invoiceCode) return;
+
+      try {
+        const response = await fetch(`/api/bills/status`);
+        const data = await response.json();
+
+        if (data.error) {
+          setTransactionStatus("Nenhuma transação em andamento");
+        } else {
+          setTransactionStatus(data.status);
+
+          if (data.status === "SUCCESS" || data.status === "CANCELLED") {
+            clearInterval(intervalId);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao verificar o status da transação:", err);
+      }
+    }, 5000); // Verifica a cada 5 segundos
+
+    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar
+  }, [invoiceCode]);
 
   const handleRefound = async () => {
     if (!id) return;
@@ -167,7 +196,6 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
             <p className="mb-3">
               <span className="font-bold">Bonus Rate:</span> {bill.bonusRate}%
             </p>
-
             <p className="mb-5">
               <span className="font-bold">Total Amount to Pay:</span>{" "}
               {calculatedAmount.toFixed(2)} {bill.currency}
@@ -185,10 +213,13 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
           <p>Loading bill details...</p>
         )}
       </div>
-      <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
-        <h2 className="text-lg font-bold">Invoice Code</h2>
-        <p>{invoiceCode}</p>
-      </div>
+
+      {transactionStatus && (
+        <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
+          <h2 className="text-lg font-bold">Status da Transação</h2>
+          <p>{transactionStatus}</p>
+        </div>
+      )}
 
       <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
         <h3 className="text-lg font-bold">Make Invoice</h3>

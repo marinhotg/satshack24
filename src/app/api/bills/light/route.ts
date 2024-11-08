@@ -201,14 +201,13 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const transactionStatus = lightningServiceNode2.getTransactionStatus();
+  const transactionStatus1 = lightningServiceNode1.getTransactionStatus();
+  const transactionStatus2 = lightningServiceNode2.getTransactionStatus();
 
-  if (!transactionStatus) {
-    return NextResponse.json(
-      { error: "Nenhuma transação em andamento" },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json({ status: transactionStatus });
+  return NextResponse.json({
+    node1Status:
+      transactionStatus1 || "Nenhuma transação em andamento para o Node 1",
+    node2Status:
+      transactionStatus2 || "Nenhuma transação em andamento para o Node 2",
+  });
 }
