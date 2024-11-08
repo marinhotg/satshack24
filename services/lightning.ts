@@ -54,7 +54,7 @@ class LightningService {
     }
   }
 
-  startListeningForTransaction(nodeId: string) {
+  startListeningForTransaction() {
     if (this.subscription) {
       console.log("Already listening for transactions.");
       return;
@@ -62,25 +62,31 @@ class LightningService {
 
     console.log("Starting to listen for transactions...");
 
-    this.subscription = this.client.listenToTransactions([nodeId]).subscribe({
-      next: (transaction) => {
-        if (transaction) {
-          console.log(`Transaction updated! ${JSON.stringify(transaction)}`);
-          if (transaction.status === TransactionStatus.SUCCESS) {
-            console.log("Transaction confirmed!");
-            this.stopListening();
-          } else if (transaction.status === TransactionStatus.CANCELLED) {
-            console.log("Transaction cancelled.");
-            this.stopListening();
-          } else if (transaction.status === TransactionStatus.PENDING) {
-            console.log("Transaction pending.");
+    this.subscription = this.client
+      .listenToTransactions([this.nodeId])
+      .subscribe({
+        next: (transaction) => {
+          if (transaction) {
+            console.log(`Transaction updated! ${JSON.stringify(transaction)}`);
+
+            // Atualiza o status da transação
+            this.transactionStatus = transaction.status;
+
+            if (transaction.status === TransactionStatus.SUCCESS) {
+              console.log("Transaction confirmed!");
+              this.stopListening();
+            } else if (transaction.status === TransactionStatus.CANCELLED) {
+              console.log("Transaction cancelled.");
+              this.stopListening();
+            } else if (transaction.status === TransactionStatus.PENDING) {
+              console.log("Transaction pending.");
+            }
           }
-        }
-      },
-      error: (error) => {
-        console.error("Error listening for transactions:", error);
-      },
-    });
+        },
+        error: (error) => {
+          console.error("Error listening for transactions:", error);
+        },
+      });
   }
 
   stopListening() {
@@ -90,7 +96,6 @@ class LightningService {
       this.subscription = undefined;
     }
   }
-
   getNodeId(): string {
     return this.nodeId;
   }

@@ -75,18 +75,19 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
   // Função para verificar o status da transação periodicamente
   useEffect(() => {
     const intervalId = setInterval(async () => {
-      if (!invoiceCode) return;
-
       try {
-        const response = await fetch(`/api/bills/status`);
+        const response = await fetch(`/api/bills/light`);
         const data = await response.json();
 
         if (data.error) {
           setTransactionStatus("Nenhuma transação em andamento");
         } else {
-          setTransactionStatus(data.status);
+          setTransactionStatus(data.node2Status);
 
-          if (data.status === "SUCCESS" || data.status === "CANCELLED") {
+          if (
+            data.node2Status === "SUCCESS" ||
+            data.node2Status === "CANCELLED"
+          ) {
             clearInterval(intervalId);
           }
         }
@@ -96,7 +97,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
     }, 5000); // Verifica a cada 5 segundos
 
     return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar
-  }, [invoiceCode]);
+  }, []);
 
   const handleRefound = async () => {
     if (!id) return;
@@ -138,7 +139,8 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         },
         body: JSON.stringify({
           billId: id,
-          amount: (bill.amount * (1 + bill.bonusRate / 100)/ btcValue) * 1000000,
+          amount:
+            ((bill.amount * (1 + bill.bonusRate / 100)) / btcValue) * 1000000,
           memo: memo,
         }), // Envia apenas o id para a rota
       });

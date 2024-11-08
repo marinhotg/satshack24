@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       safeMemo
     );
 
-    lightningService.startListeningForTransaction(nodeId);
+    lightningService.startListeningForTransaction();
 
     const qrCode = await lightningService.generateInvoiceQRCode(invoice);
 
@@ -205,9 +205,7 @@ export async function GET() {
   const transactionStatus2 = lightningServiceNode2.getTransactionStatus();
 
   return NextResponse.json({
-    node1Status:
-      transactionStatus1 || "Nenhuma transação em andamento para o Node 1",
-    node2Status:
-      transactionStatus2 || "Nenhuma transação em andamento para o Node 2",
+    node1Status: transactionStatus1 || "Nenhuma transação em andamento",
+    node2Status: transactionStatus2 || "Nenhuma transação em andamento",
   });
 }
