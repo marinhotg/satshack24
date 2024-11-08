@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const transactionStatus1 = lightningServiceNode1.getTransactionStatus();
   const transactionStatus2 = lightningServiceNode2.getTransactionStatus();
 
