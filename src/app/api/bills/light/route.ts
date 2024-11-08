@@ -163,6 +163,7 @@ export async function POST(req: NextRequest) {
       success: true,
       qrCode,
       invoice,
+      nodeId,
       debug: {
         originalAmount: amount,
         btcAmount,
