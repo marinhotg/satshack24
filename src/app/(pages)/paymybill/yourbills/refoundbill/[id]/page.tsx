@@ -55,7 +55,6 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         );
       }
     };
-    
 
     const fetchBtcValue = async () => {
       try {
@@ -84,9 +83,9 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
           setTransactionStatus("Nenhuma transação em andamento");
         } else {
           if (data.nodeId === process.env.LIGHTSPARK_API_TOKEN_CLIENT_ID!) {
-            setTransactionStatus(data.node1Status);
-          } else {
             setTransactionStatus(data.node2Status);
+          } else {
+            setTransactionStatus(data.node1Status);
           }
 
           if (
@@ -166,9 +165,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
     } finally {
       setIsLoadingInvoice(false);
     }
-    
   };
-  
 
   const calculatedAmount = bill ? bill.amount * (1 + bill.bonusRate / 100) : 0;
 
@@ -223,14 +220,9 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         )}
       </div>
       <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
-        <h3 className="text-lg font-bold text-center">
-          Invoice Code
-        </h3>
+        <h3 className="text-lg font-bold text-center">Invoice Code</h3>
         <p className="break-words">{invoiceCode}</p>
       </div>
-
-
-
 
       {transactionStatus && (
         <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
