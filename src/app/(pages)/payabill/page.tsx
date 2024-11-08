@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCurrencyList } from '../paymybill/components/currencyList';
+import StarDisplay from '../paymybill/components/StarDisplay'; 
 
 interface Bill {
   id: number;
@@ -14,6 +15,7 @@ interface Bill {
   status: string;
   uploader: {
     name: string;
+    averageRating: number;
   };
 }
 
@@ -23,6 +25,8 @@ const BillCard = ({
   currency,
   dueDate,
   bonusRate,
+  uploaderName,
+  averageRating,
   onSelect,
 }: {
   billNumber: number;
@@ -30,20 +34,28 @@ const BillCard = ({
   currency: string;
   dueDate: string;
   bonusRate: number;
+  uploaderName: string;
+  averageRating: number;
   onSelect: () => void;
 }) => {
   const formattedDate = new Date(dueDate).toLocaleDateString();
-  
+
   return (
-    <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 text-center shadow-md h-64 flex flex-col justify-between w-80">
+    <div className="bg-yellow-200 border-2 border-black rounded-lg p-6 text-center shadow-md h-72 flex flex-col justify-between w-80">
       <div>
         <h2 className="text-3xl font-bold text-teal-900">Bill {billNumber}</h2>
-        <p className="text-xl font-medium text-teal-800">Value: {amount} {currency}</p>
+        <p className="text-xl font-medium text-teal-800">
+          Value: {amount} {currency}
+        </p>
         <p className="text-lg text-teal-800">Due Date: {formattedDate}</p>
         <p className="text-lg text-teal-800">Bonus Rate: {bonusRate}%</p>
+        <p className="text-lg font-medium text-teal-800">Uploader: {uploaderName}</p>
+        <div className="flex items-center justify-center mt-0">
+          <StarDisplay rating={averageRating} /> 
+        </div>
       </div>
       <button
-        className="bg-green-300 text-teal-900 font-bold border border-black rounded-lg px-4 py-3 mt-4 hover:bg-green-400"
+        className="bg-green-300 text-teal-900 font-bold border border-black rounded-lg px-4 py-3 mt-1 hover:bg-green-400"
         onClick={onSelect}
       >
         Select
@@ -51,6 +63,8 @@ const BillCard = ({
     </div>
   );
 };
+
+
 
 const BillSelectionPage = () => {
   const router = useRouter();
@@ -267,21 +281,24 @@ const BillSelectionPage = () => {
         </div>
       )}
 
-      <div className="flex justify-center items-center w-full px-6 mt-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 w-full max-w-5xl mx-auto justify-items-center">
-          {filteredBills.map((bill) => (
-            <BillCard
-              key={bill.id}
-              billNumber={bill.id}
-              amount={bill.amount}
-              currency={bill.currency}
-              dueDate={bill.dueDate}
-              bonusRate={bill.bonusRate}
-              onSelect={() => handleSelectBill(bill)}
-            />
-          ))}
-        </div>
-      </div>
+<div className="flex justify-center items-center w-full px-6 mt-4">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 w-full max-w-5xl mx-auto justify-items-center">
+    {filteredBills.map((bill) => (
+      <BillCard
+        key={bill.id}
+        billNumber={bill.id}
+        amount={bill.amount}
+        currency={bill.currency}
+        dueDate={bill.dueDate}
+        bonusRate={bill.bonusRate}
+        uploaderName={bill.uploader.name}
+        averageRating={bill.uploader.averageRating}
+        onSelect={() => handleSelectBill(bill)}
+      />
+    ))}
+  </div>
+</div>
+
 
       {selectedBill && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-custom">
@@ -292,6 +309,7 @@ const BillSelectionPage = () => {
             <p className="text-lg text-teal-800">Due Date: {new Date(selectedBill.dueDate).toLocaleDateString()}</p>
             <p className="text-lg text-teal-800">Bonus Rate: {selectedBill.bonusRate}%</p>
             <p className="text-lg text-teal-800">Uploaded by: {selectedBill.uploader.name}</p>
+            <p className="text-lg text-teal-800">Uploader Rating: {selectedBill.uploader.averageRating}</p>
             <button
               onClick={() => handleReserveBill(selectedBill.id)}
               disabled={isReserving}
