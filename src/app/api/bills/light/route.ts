@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import lightningService from "@/services/lightning";
+import {
+  lightningServiceNode1,
+  lightningServiceNode2,
+} from "@/services/lightning";
 import { UserService } from "@/services/user";
 import { billService } from "@/services/bill";
 
 const userService = new UserService();
+
+const NODE_ID_1 = process.env.LIGHTSPARK_NODE_ID!;
+const NODE_ID_2 = process.env.LIGHTSPARK_NODE_ID2!;
+
+// Função para escolher a instância com base no nodeId
+function getLightningServiceByNodeId(nodeId: string) {
+  if (nodeId === NODE_ID_1) {
+    return lightningServiceNode1;
+  } else if (nodeId === NODE_ID_2) {
+    return lightningServiceNode2;
+  } else {
+    throw new Error("NodeId não corresponde a nenhuma instância configurada.");
+  }
+}
 
 /**
  * Validates and converts the input amount to BTC
@@ -21,8 +38,8 @@ function validateAndConvertToBTC(amount: number): number {
 /**
  * Validates if the amount is within acceptable ranges
  */
-function validateAmount(btcAmount: number): { 
-  isValid: boolean; 
+function validateAmount(btcAmount: number): {
+  isValid: boolean;
   error?: string;
   sats?: number;
   msats?: number;
@@ -31,27 +48,27 @@ function validateAmount(btcAmount: number): {
   const MAX_BTC = 0.1;
   // Minimum allowed is 1 sat
   const MIN_SATS = 1;
-  
+
   const sats = btcAmount * 100_000_000;
-  
+
   if (btcAmount > MAX_BTC) {
-    return { 
-      isValid: false, 
-      error: `Valor muito alto. Máximo permitido é ${MAX_BTC} BTC`
-    };
-  }
-  
-  if (sats < MIN_SATS) {
-    return { 
-      isValid: false, 
-      error: "Valor muito baixo. Mínimo permitido é 1 sat"
+    return {
+      isValid: false,
+      error: `Valor muito alto. Máximo permitido é ${MAX_BTC} BTC`,
     };
   }
 
-  return { 
+  if (sats < MIN_SATS) {
+    return {
+      isValid: false,
+      error: "Valor muito baixo. Mínimo permitido é 1 sat",
+    };
+  }
+
+  return {
     isValid: true,
     sats: Math.round(sats),
-    msats: Math.round(sats * 1000)
+    msats: Math.round(sats * 1000),
   };
 }
 
@@ -67,7 +84,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
+    if (!amount || typeof amount !== "number" || amount <= 0) {
       return NextResponse.json(
         { error: "amount deve ser um número positivo válido." },
         { status: 400 }
@@ -82,12 +99,12 @@ export async function POST(req: NextRequest) {
     const validation = validateAmount(btcAmount);
     if (!validation.isValid) {
       return NextResponse.json(
-        { 
+        {
           error: validation.error,
           details: {
             providedAmount: amount,
-            convertedBTC: btcAmount
-          }
+            convertedBTC: btcAmount,
+          },
         },
         { status: 400 }
       );
@@ -126,18 +143,23 @@ export async function POST(req: NextRequest) {
       debug: {
         originalAmount: amount,
         convertedBTC: btcAmount,
-        sats: validation.sats
-      }
+        sats: validation.sats,
+      },
     });
 
+    const lightningService = getLightningServiceByNodeId(nodeId);
+
     const invoice = await lightningService.createUserInvoice(
+      nodeId,
       validation.msats!,
-      safeMemo,
+      safeMemo
     );
+
+    lightningService.startListeningForTransaction();
 
     const qrCode = await lightningService.generateInvoiceQRCode(invoice);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       qrCode,
       invoice,
@@ -145,24 +167,23 @@ export async function POST(req: NextRequest) {
         originalAmount: amount,
         btcAmount,
         sats: validation.sats,
-        msats: validation.msats
-      }
+        msats: validation.msats,
+      },
     });
-
   } catch (error) {
     console.error("Erro ao criar invoice no backend:", error);
-    
+
     if (error instanceof Error) {
       // Handle Lightspark specific errors
-      if (error.message.includes('LightsparkException')) {
-        const errorDetails = error.message.includes('NotFoundException') 
-          ? 'Node não encontrado. Verifique as configurações do node.'
+      if (error.message.includes("LightsparkException")) {
+        const errorDetails = error.message.includes("NotFoundException")
+          ? "Node não encontrado. Verifique as configurações do node."
           : error.message;
-          
+
         return NextResponse.json(
-          { 
+          {
             error: "Erro ao criar invoice na Lightning Network",
-            details: errorDetails
+            details: errorDetails,
           },
           { status: 400 }
         );
@@ -170,11 +191,21 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
-        error: "Erro ao criar o invoice", 
-        details: error instanceof Error ? error.message : 'Erro desconhecido' 
+      {
+        error: "Erro ao criar o invoice",
+        details: error instanceof Error ? error.message : "Erro desconhecido",
       },
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  const transactionStatus1 = lightningServiceNode1.getTransactionStatus();
+  const transactionStatus2 = lightningServiceNode2.getTransactionStatus();
+
+  return NextResponse.json({
+    node1Status: transactionStatus1 || "Nenhuma transação em andamento",
+    node2Status: transactionStatus2 || "Nenhuma transação em andamento",
+  });
 }
