@@ -61,9 +61,15 @@ The platform features a reputation system for trust, and flexible bonus rates se
     - **Version**: 1.8.8
     - **Description**: A software development kit for integrating Lightspark's cryptocurrency payment solutions into the application.
 
+- #### QR Code Generator
+    - **Description**: A JavaScript library for generating QR codes from strings. Enabling users to create invoices for payments using the Lightning Network protocol
+
+- #### Bitcoin price API
+    - **Description**: A free and open-source API that provides real-time Bitcoin price data.
+    - **Link**: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd
 #
 ### Deployment Link
-[Private Bills](https://satshack24.vercel.app/)
+[Private Bills](https://privatebills.vercel.app/)
 
 
 ### Installation and Local Execution
