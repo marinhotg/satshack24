@@ -151,7 +151,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
       }
 
       const data = JSON.parse(text);
-      setInvoiceCode(data.invoiceCode);
+      setInvoiceCode(data.invoice);
       setQrCodeURL(data.qrCode);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
@@ -212,6 +212,12 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         ) : (
           <p>Loading bill details...</p>
         )}
+      </div>
+      <div className="bg-yellow-200 w-[40vw] rounded-lg p-4 shadow-lg border-2 border-black mt-8">
+        <h3 className="text-lg font-bold">
+          Refound Invoice
+          {invoiceCode}
+        </h3>
       </div>
 
       {transactionStatus && (
