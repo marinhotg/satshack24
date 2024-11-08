@@ -10,7 +10,7 @@ const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({ dataUrl, size = 200 }) =>
   if (!dataUrl) return null;
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 flex flex-col items-center">
       <h3 className="text-lg font-bold mb-2">QR Code:</h3>
       <div className="relative" style={{ width: size, height: size }}>
         <Image

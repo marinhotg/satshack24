@@ -138,7 +138,7 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         },
         body: JSON.stringify({
           billId: id,
-          amount: bill.amount * (1 + bill.bonusRate / 100),
+          amount: (bill.amount * (1 + bill.bonusRate / 100)/ btcValue) * 1000000,
           memo: memo,
         }), // Envia apenas o id para a rota
       });
@@ -255,8 +255,8 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
           {isLoadingInvoice ? "Creating Invoice..." : "Create Invoice"}
         </button>
         {qrCodeURL && (
-          <div className="mt-4">
-            {qrCodeURL && <QRCodeDisplay dataUrl={qrCodeURL} />}
+          <div className="mt-4 flex justify-center">
+            <QRCodeDisplay dataUrl={qrCodeURL} />
           </div>
         )}
       </div>
