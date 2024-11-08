@@ -67,9 +67,10 @@ The platform features a reputation system for trust, and flexible bonus rates se
 - #### Bitcoin price API
     - **Description**: A free and open-source API that provides real-time Bitcoin price data.
     - **Link**: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd
-
+#
 ### Deployment Link
-[Private Bills](https://satshack24.vercel.app/)
+[Private Bills](https://privatebills.vercel.app/)
+
 
 ### Installation and Local Execution
 
