@@ -34,7 +34,6 @@ The platform features a reputation system for trust, and flexible bonus rates se
    - Transaction is completed instantly
 
 #### Key Features
-- Quick 30-minute reservation system
 - Reputation system for trust building
 - Instant Lightning Network settlements
 - Flexible bonus rates
