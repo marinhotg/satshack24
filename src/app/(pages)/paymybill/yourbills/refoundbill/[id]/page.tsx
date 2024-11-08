@@ -82,11 +82,15 @@ const RefoundBill: React.FC<RefoundBillProps> = ({ params }) => {
         if (data.error) {
           setTransactionStatus("Nenhuma transação em andamento");
         } else {
-          setTransactionStatus(data.node2Status);
+          if (data.nodeId === process.env.LIGHTSPARK_API_TOKEN_CLIENT_ID!) {
+            setTransactionStatus(data.node1Status);
+          } else {
+            setTransactionStatus(data.node2Status);
+          }
 
           if (
-            data.node2Status === "SUCCESS" ||
-            data.node2Status === "CANCELLED"
+            transactionStatus === "SUCCESS" ||
+            transactionStatus === "CANCELLED"
           ) {
             clearInterval(intervalId);
           }
